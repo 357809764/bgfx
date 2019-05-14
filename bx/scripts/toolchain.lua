@@ -1,5 +1,5 @@
 --
--- Copyright 2010-2019 Branimir Karadzic. All rights reserved.
+-- Copyright 2010-2018 Branimir Karadzic. All rights reserved.
 -- License: https://github.com/bkaradzic/bx#license-bsd-2-clause
 --
 
@@ -193,9 +193,7 @@ function toolchain(_buildDir, _libDir)
 	end
 
 	flags {
-		"Cpp14",
 		"ExtraWarnings",
-		"FloatFast",
 	}
 
 	if _ACTION == "gmake" or _ACTION == "ninja" then
@@ -230,7 +228,6 @@ function toolchain(_buildDir, _libDir)
 
 			premake.gcc.cc   = "$(ANDROID_NDK_CLANG)/bin/clang"
 			premake.gcc.cxx  = "$(ANDROID_NDK_CLANG)/bin/clang++"
-			premake.gcc.ar   = "$(ANDROID_NDK_X86)/bin/i686-linux-android-ar"
 			premake.gcc.llvm = true
 			location (path.join(_buildDir, "projects", _ACTION .. "-android-x86"))
 
@@ -636,6 +633,9 @@ function toolchain(_buildDir, _libDir)
 			"-Wunused-value",
 			"-Wundef",
 		}
+		buildoptions_cpp {
+			"-std=c++14",
+		}
 		linkoptions {
 			"-Wl,--gc-sections",
 			"-static",
@@ -722,6 +722,9 @@ function toolchain(_buildDir, _libDir)
 			"-Wundef",
 --			"-Wuseless-cast",
 		}
+		buildoptions_cpp {
+			"-std=c++14",
+		}
 		links {
 			"rt",
 			"dl",
@@ -776,6 +779,9 @@ function toolchain(_buildDir, _libDir)
 			"-Wunused-value",
 			"-Wundef",
 		}
+		buildoptions_cpp {
+			"-std=c++14",
+		}
 		links {
 			"rt",
 			"dl",
@@ -791,6 +797,9 @@ function toolchain(_buildDir, _libDir)
 		buildoptions {
 			"-Wunused-value",
 			"-Wundef",
+		}
+		buildoptions_cpp {
+			"-std=c++14",
 		}
 		links {
 			"rt",
@@ -831,6 +840,9 @@ function toolchain(_buildDir, _libDir)
 			"-Wunused-value",
 			"-Wundef",
 		}
+		buildoptions_cpp {
+			"-std=c++14",
+		}
 		linkoptions {
 			"-no-canonical-prefixes",
 			"-Wl,--no-undefined",
@@ -848,6 +860,7 @@ function toolchain(_buildDir, _libDir)
 			"__STEAMLINK__=1", -- There is no special prefedined compiler symbol to detect SteamLink, faking it.
 		}
 		buildoptions {
+			"-std=c++14",
 			"-Wfatal-errors",
 			"-Wunused-value",
 			"-Wundef",
@@ -932,6 +945,9 @@ function toolchain(_buildDir, _libDir)
 			"-Wunused-value",
 			"-Wundef",
 		}
+		buildoptions_cpp {
+			"-std=c++14",
+		}
 
 	configuration { "freebsd" }
 		targetdir (path.join(_buildDir, "freebsd/bin"))
@@ -989,6 +1005,12 @@ function toolchain(_buildDir, _libDir)
 		objdir (path.join(_buildDir, "osx_universal/bin"))
 
 	configuration { "osx" }
+		buildoptions_cpp {
+			"-std=c++14",
+		}
+		buildoptions_objcpp {
+			"-std=c++14",
+		}
 		buildoptions {
 			"-Wfatal-errors",
 			"-msse2",
@@ -1000,6 +1022,12 @@ function toolchain(_buildDir, _libDir)
 	configuration { "ios*" }
 		linkoptions {
 			"-lc++",
+		}
+		buildoptions_cpp {
+			"-std=c++14",
+		}
+		buildoptions_objcpp {
+			"-std=c++14",
 		}
 		buildoptions {
 			"-Wfatal-errors",
@@ -1144,6 +1172,9 @@ function toolchain(_buildDir, _libDir)
 			"$(SCE_ORBIS_SDK_DIR)/target/include",
 			"$(SCE_ORBIS_SDK_DIR)/target/include_common",
 		}
+		buildoptions_cpp {
+			"-std=c++14",
+		}
 
 	configuration { "rpi" }
 		targetdir (path.join(_buildDir, "rpi/bin"))
@@ -1159,6 +1190,9 @@ function toolchain(_buildDir, _libDir)
 		buildoptions {
 			"-Wunused-value",
 			"-Wundef",
+		}
+		buildoptions_cpp {
+			"-std=c++14",
 		}
 		includedirs {
 			"/opt/vc/include",
@@ -1188,6 +1222,9 @@ function toolchain(_buildDir, _libDir)
 			"-Wunused-value",
 			"-Wundef",
 			"--sysroot=$(FREEDOM_E_SDK)/work/build/riscv-gnu-toolchain/riscv64-unknown-elf/prefix/riscv64-unknown-elf",
+		}
+		buildoptions_cpp {
+			"-std=c++14",
 		}
 
 	configuration {} -- reset configuration
