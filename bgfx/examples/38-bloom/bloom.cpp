@@ -14,6 +14,7 @@
 #include "imgui/imgui.h"
 #include "camera.h"
 #include "bounds.h"
+#include <bx/bx_const.h>
 
 namespace
 {
@@ -76,7 +77,7 @@ struct PosTexCoord0Vertex
 
 bgfx::VertexDecl PosTexCoord0Vertex::ms_decl;
 
-constexpr float cs = 0.29f;
+BX_CONSTEXPR_VAR float cs = 0.29f;
 
 static PosVertex s_cubeVertices[24] =
 {

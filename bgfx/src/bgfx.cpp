@@ -1639,7 +1639,9 @@ namespace bgfx
 		"LineStrip",
 		"Points",
 	};
+	#ifdef BX_VS2017
 	BX_STATIC_ASSERT(Topology::Count == BX_COUNTOF(s_topologyName) );
+	#endif
 
 	const char* getName(Topology::Enum _topology)
 	{

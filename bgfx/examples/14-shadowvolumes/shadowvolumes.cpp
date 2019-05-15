@@ -20,10 +20,15 @@ namespace stl = tinystl;
 #include <bx/simd_t.h>
 #include <bx/math.h>
 #include <bx/file.h>
+#include <bx/bx_const.h>
 #include "entry/entry.h"
 #include "camera.h"
 #include "imgui/imgui.h"
 
+#ifdef BX_VS2013
+void submit(bgfx::ViewId _id, bgfx::ProgramHandle _handle, int32_t _depth = 0);
+void touch(bgfx::ViewId _id);
+#endif
 namespace bgfx
 {
 	int32_t read(bx::ReaderI* _reader, bgfx::VertexDecl& _decl, bx::Error* _err = NULL);
@@ -830,7 +835,11 @@ struct Group
 
 		//Get unique indices.
 		WeldedVertex* uniqueVertices = (WeldedVertex*)malloc(m_numVertices*sizeof(WeldedVertex) );
-		::weldVertices(uniqueVertices, _decl, m_vertices, m_numVertices, 0.0001f);
+#ifdef BX_VS2013
+		weldVertices(uniqueVertices, _decl, m_vertices, m_numVertices, 0.0001f);
+#else
+	    ::weldVertices(uniqueVertices, _decl, m_vertices, m_numVertices, 0.0001f);
+#endif
 		uint16_t* uniqueIndices = (uint16_t*)malloc(m_numIndices*sizeof(uint16_t) );
 		for (uint32_t ii = 0; ii < m_numIndices; ++ii)
 		{
@@ -1148,8 +1157,13 @@ struct Model
 			}
 			bgfx::setTexture(1, s_texStencil, bgfx::getTexture(s_stencilFb) );
 
+#ifdef BX_VS2013
+			// Apply render state
+			setRenderState(_renderState);
+#else
 			// Apply render state
 			::setRenderState(_renderState);
+#endif
 
 			// Submit
 			BX_CHECK(bgfx::kInvalidHandle != m_program, "Error, program is not set.");
@@ -2755,7 +2769,11 @@ public:
 							bgfx::setTransform(shadowVolumeMtx);
 							bgfx::setVertexBuffer(0, group.m_vbh);
 							bgfx::setIndexBuffer(shadowVolume.m_ibBackCap);
+#ifdef BX_VS2013
+							setRenderState(renderStateCraftStencil);
+#else
 							::setRenderState(renderStateCraftStencil);
+#endif
 							::submit(viewId, m_svProgs[programIndex][ShadowVolumePart::Back]);
 						}
 
@@ -2767,7 +2785,11 @@ public:
 							bgfx::setTransform(shadowVolumeMtx);
 							bgfx::setVertexBuffer(0, shadowVolume.m_vbSides);
 							bgfx::setIndexBuffer(shadowVolume.m_ibSides);
+#ifdef BX_VS2013
+							setRenderState(renderState);
+#else
 							::setRenderState(renderState);
+#endif
 							::submit(VIEWID_RANGE1_PASS3, m_svProgs[ShadowVolumeProgramType::Color][ShadowVolumePart::Side]);
 
 							if (shadowVolume.m_cap)
@@ -2776,14 +2798,22 @@ public:
 								bgfx::setTransform(shadowVolumeMtx);
 								bgfx::setVertexBuffer(0, group.m_vbh);
 								bgfx::setIndexBuffer(shadowVolume.m_ibFrontCap);
+#ifdef BX_VS2013
+								setRenderState(renderState);
+#else
 								::setRenderState(renderState);
+#endif 
 								::submit(VIEWID_RANGE1_PASS3, m_svProgs[ShadowVolumeProgramType::Color][ShadowVolumePart::Front]);
 
 								s_uniforms.submitPerDrawUniforms();
 								bgfx::setTransform(shadowVolumeMtx);
 								bgfx::setVertexBuffer(0, group.m_vbh);
 								bgfx::setIndexBuffer(shadowVolume.m_ibBackCap);
+#ifdef BX_VS2013
+								setRenderState(renderState);
+#else
 								::setRenderState(renderState);
+#endif
 								::submit(VIEWID_RANGE1_PASS3, m_svProgs[ShadowVolumeProgramType::Color][ShadowVolumePart::Back]);
 							}
 						}

@@ -7,6 +7,7 @@
 #define BX_MACROS_H_HEADER_GUARD
 
 #include "bx.h"
+#include "bx_const.h"
 
 ///
 #if BX_COMPILER_MSVC
@@ -115,10 +116,16 @@
 
 /// The return value of the function is solely a function of the arguments.
 ///
+#ifdef BX_VS2013
+#include <assert.h>
+#define BX_CONSTEXPR_FUNC  BX_CONST_FUNC
+#define BX_STATIC_ASSERT(_condition, ...) 
+#else
 #define BX_CONSTEXPR_FUNC constexpr BX_CONST_FUNC
 
 ///
 #define BX_STATIC_ASSERT(_condition, ...) static_assert(_condition, "" __VA_ARGS__)
+#endif
 
 ///
 #define BX_ALIGN_DECL_16(_decl) BX_ALIGN_DECL(16, _decl)

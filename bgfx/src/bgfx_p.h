@@ -24,6 +24,8 @@
 
 #include <inttypes.h>
 
+#include <bx/bx_const.h>
+
 // Check handle, cannot be bgfx::kInvalidHandle and must be valid.
 #define BGFX_CHECK_HANDLE(_desc, _handleAlloc, _handle)    \
 			BX_CHECK(isValid(_handle)                      \
@@ -316,7 +318,10 @@ namespace bgfx
 
 	bool windowsVersionIs(Condition::Enum _op, uint32_t _version);
 
-	constexpr bool isShaderType(uint32_t _magic, char _type)
+#ifdef BX_VS2013
+	static
+#endif 
+	 BX_CONSTEXPR_VAR bool isShaderType(uint32_t _magic, char _type)
 	{
 		return uint32_t(_type) == (_magic & BX_MAKEFOURCC(0xff, 0, 0, 0) );
 	}
@@ -1302,12 +1307,14 @@ namespace bgfx
 #define BGFX_UNIFORM_SAMPLERBIT  UINT8_C(0x20)
 #define BGFX_UNIFORM_MASK (BGFX_UNIFORM_FRAGMENTBIT|BGFX_UNIFORM_SAMPLERBIT)
 
+#define UniformBufferSize  (256 << 20) // fyl
+	
 	class UniformBuffer
 	{
 	public:
 		static UniformBuffer* create(uint32_t _size = 1<<20)
 		{
-			const uint32_t structSize = sizeof(UniformBuffer)-sizeof(UniformBuffer::m_buffer);
+			const uint32_t structSize = sizeof(UniformBuffer)-UniformBufferSize;
 
 			uint32_t size = BX_ALIGN_16(_size);
 			void*    data = BX_ALLOC(g_allocator, size+structSize);
@@ -1325,7 +1332,7 @@ namespace bgfx
 			UniformBuffer* uniformBuffer = *_uniformBuffer;
 			if (_treshold >= uniformBuffer->m_size - uniformBuffer->m_pos)
 			{
-				const uint32_t structSize = sizeof(UniformBuffer)-sizeof(UniformBuffer::m_buffer);
+				const uint32_t structSize = sizeof(UniformBuffer)-UniformBufferSize;
 				uint32_t size = BX_ALIGN_16(uniformBuffer->m_size + _grow);
 				void*    data = BX_REALLOC(g_allocator, uniformBuffer, size+structSize);
 				uniformBuffer = reinterpret_cast<UniformBuffer*>(data);
@@ -1427,7 +1434,7 @@ namespace bgfx
 
 		uint32_t m_size;
 		uint32_t m_pos;
-		char m_buffer[256<<20];
+		char m_buffer[UniformBufferSize];
 	};
 
 	struct UniformRegInfo

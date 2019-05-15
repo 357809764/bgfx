@@ -15,6 +15,7 @@
 
 #include "vs_particle.bin.h"
 #include "fs_particle.bin.h"
+#include <bx/bx_const.h>
 
 static const bgfx::EmbeddedShader s_embeddedShaders[] =
 {
@@ -237,7 +238,7 @@ namespace ps
 			const uint32_t numParticles = uint32_t(m_dt / timePerParticle);
 			m_dt -= numParticles * timePerParticle;
 
-			constexpr bx::Vec3 up = { 0.0f, 1.0f, 0.0f };
+			BX_CONSTEXPR_VAR bx::Vec3 up = { 0.0f, 1.0f, 0.0f };
 
 			float time = 0.0f;
 			for (uint32_t ii = 0

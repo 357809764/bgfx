@@ -62,9 +62,14 @@
 #define DXGI_FORMAT_ASTC_12X12_UNORM      DXGI_FORMAT(186)
 #define DXGI_FORMAT_ASTC_12X12_UNORM_SRGB DXGI_FORMAT(187)
 
+#include <bx/bx_const.h>
+
 namespace bgfx
 {
-	constexpr uint32_t toRgba8(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a)
+#ifdef BX_VS2013
+	static
+#endif
+	BX_CONSTEXPR_VAR uint32_t toRgba8(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a)
 	{
 		return 0
 			| (uint32_t(_r)<<24)

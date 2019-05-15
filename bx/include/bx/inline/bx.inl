@@ -7,6 +7,8 @@
 #	error "Must be included from bx/bx.h!"
 #endif // BX_H_HEADER_GUARD
 
+#include "bx/bx_const.h"
+
 namespace bx
 {
 	// Reference(S):
@@ -16,24 +18,24 @@ namespace bx
 	char(&CountOfRequireArrayArgumentT(const Ty(&)[Num]))[Num];
 
 	template<bool>
-	inline constexpr bool isEnabled()
+	inline BX_CONSTEXPR bool isEnabled()
 	{
 		return true;
 	}
 
 	template<class Ty>
-	inline constexpr bool isTriviallyCopyable()
+	inline BX_CONSTEXPR bool isTriviallyCopyable()
 	{
 		return __is_trivially_copyable(Ty);
 	}
 
 	template<>
-	inline constexpr bool isEnabled<false>()
+	inline BX_CONSTEXPR bool isEnabled<false>()
 	{
 		return false;
 	}
 
-	inline constexpr bool ignoreC4127(bool _x)
+	inline BX_CONSTEXPR bool ignoreC4127(bool _x)
 	{
 		return _x;
 	}
@@ -45,43 +47,43 @@ namespace bx
 	}
 
 	template<typename Ty>
-	inline constexpr Ty min(const Ty& _a, const Ty& _b)
+	inline BX_CONSTEXPR Ty min(const Ty& _a, const Ty& _b)
 	{
 		return _a < _b ? _a : _b;
 	}
 
 	template<typename Ty>
-	inline constexpr Ty max(const Ty& _a, const Ty& _b)
+	inline BX_CONSTEXPR Ty max(const Ty& _a, const Ty& _b)
 	{
 		return _a > _b ? _a : _b;
 	}
 
 	template<typename Ty>
-	inline constexpr Ty min(const Ty& _a, const Ty& _b, const Ty& _c)
+	inline BX_CONSTEXPR Ty min(const Ty& _a, const Ty& _b, const Ty& _c)
 	{
 		return min(min(_a, _b), _c);
 	}
 
 	template<typename Ty>
-	inline constexpr Ty max(const Ty& _a, const Ty& _b, const Ty& _c)
+	inline BX_CONSTEXPR Ty max(const Ty& _a, const Ty& _b, const Ty& _c)
 	{
 		return max(max(_a, _b), _c);
 	}
 
 	template<typename Ty>
-	inline constexpr Ty mid(const Ty& _a, const Ty& _b, const Ty& _c)
+	inline BX_CONSTEXPR Ty mid(const Ty& _a, const Ty& _b, const Ty& _c)
 	{
 		return max(min(_a, _b), min(max(_a, _b), _c) );
 	}
 
 	template<typename Ty>
-	inline constexpr Ty clamp(const Ty& _a, const Ty& _min, const Ty& _max)
+	inline BX_CONSTEXPR Ty clamp(const Ty& _a, const Ty& _min, const Ty& _max)
 	{
 		return max(min(_a, _max), _min);
 	}
 
 	template<typename Ty>
-	inline constexpr bool isPowerOf2(Ty _a)
+	inline BX_CONSTEXPR bool isPowerOf2(Ty _a)
 	{
 		return _a && !(_a & (_a - 1) );
 	}

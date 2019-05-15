@@ -8,13 +8,14 @@
 
 #include "error.h"
 #include "string.h"
+#include "bx_const.h"
 
 BX_ERROR_RESULT(BX_ERROR_ACCESS,        BX_MAKEFOURCC('b', 'x', 0, 0) );
 BX_ERROR_RESULT(BX_ERROR_NOT_DIRECTORY, BX_MAKEFOURCC('b', 'x', 0, 1) );
 
 namespace bx
 {
-	constexpr int32_t kMaxFilePath = 1024;
+   BX_CONSTEXPR_VAR int32_t kMaxFilePath = 1024;
 
 	/// Special predefined OS directories.
 	///

@@ -8,6 +8,7 @@
 #include <bx/hash.h>
 #include <bx/readerwriter.h>
 #include <bx/string.h>
+#include <bx/bx_const.h>
 
 namespace bx
 {
@@ -539,7 +540,7 @@ namespace bx
 		return strLTrim(strRTrim(_str, _chars), _chars);
 	}
 
-	constexpr uint32_t kFindStep = 1024;
+	BX_CONSTEXPR_VAR uint32_t kFindStep = 1024;
 
 	StringView strFindNl(const StringView& _str)
 	{

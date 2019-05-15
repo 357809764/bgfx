@@ -176,8 +176,15 @@ namespace
 
 		ValueType GetValue(float time) const
 		{
+#ifdef BX_VS2017
 			typename KeyMap::const_iterator itUpper = m_keyMap.upper_bound(time + 1e-6f);
 			typename KeyMap::const_iterator itLower = itUpper;
+#else
+			typename std::map<float, ValueType>::const_iterator itUpper = m_keyMap.upper_bound(time + 1e-6f);
+			typename std::map<float, ValueType>::const_iterator itLower = itUpper;
+#endif
+
+
 			--itLower;
 
 			if (itLower == m_keyMap.end())

@@ -6,6 +6,7 @@
 #include "bx_p.h"
 #include <bx/math.h>
 #include <bx/uint32_t.h>
+#include <bx/bx_const.h>
 
 namespace bx
 {
@@ -13,17 +14,17 @@ namespace bx
 
 	namespace
 	{
-		constexpr float kSinC2  = -0.16666667163372039794921875f;
-		constexpr float kSinC4  =  8.333347737789154052734375e-3f;
-		constexpr float kSinC6  = -1.9842604524455964565277099609375e-4f;
-		constexpr float kSinC8  =  2.760012648650445044040679931640625e-6f;
-		constexpr float kSinC10 = -2.50293279435709337121807038784027099609375e-8f;
+		BX_CONSTEXPR_VAR float kSinC2 = -0.16666667163372039794921875f;
+		BX_CONSTEXPR_VAR float kSinC4 = 8.333347737789154052734375e-3f;
+		BX_CONSTEXPR_VAR float kSinC6 = -1.9842604524455964565277099609375e-4f;
+		BX_CONSTEXPR_VAR float kSinC8 = 2.760012648650445044040679931640625e-6f;
+		BX_CONSTEXPR_VAR float kSinC10 = -2.50293279435709337121807038784027099609375e-8f;
 
-		constexpr float kCosC2  = -0.5f;
-		constexpr float kCosC4  =  4.166664183139801025390625e-2f;
-		constexpr float kCosC6  = -1.388833043165504932403564453125e-3f;
-		constexpr float kCosC8  =  2.47562347794882953166961669921875e-5f;
-		constexpr float kCosC10 = -2.59630184018533327616751194000244140625e-7f;
+		BX_CONSTEXPR_VAR float kCosC2 = -0.5f;
+		BX_CONSTEXPR_VAR float kCosC4 = 4.166664183139801025390625e-2f;
+		BX_CONSTEXPR_VAR float kCosC6 = -1.388833043165504932403564453125e-3f;
+		BX_CONSTEXPR_VAR float kCosC8 = 2.47562347794882953166961669921875e-5f;
+		BX_CONSTEXPR_VAR float kCosC10 = -2.59630184018533327616751194000244140625e-7f;
 
 	} // namespace
 
@@ -72,10 +73,10 @@ namespace bx
 
 	namespace
 	{
-		constexpr float kAcosC0 =  1.5707288f;
-		constexpr float kAcosC1 = -0.2121144f;
-		constexpr float kAcosC2 =  0.0742610f;
-		constexpr float kAcosC3 = -0.0187293f;
+		BX_CONSTEXPR_VAR float kAcosC0 = 1.5707288f;
+		BX_CONSTEXPR_VAR float kAcosC1 = -0.2121144f;
+		BX_CONSTEXPR_VAR float kAcosC2 = 0.0742610f;
+		BX_CONSTEXPR_VAR float kAcosC3 = -0.0187293f;
 
 	} // namespace
 
@@ -95,12 +96,12 @@ namespace bx
 
 	namespace
 	{
-		constexpr float kAtan2C0 = -0.013480470f;
-		constexpr float kAtan2C1 =  0.057477314f;
-		constexpr float kAtan2C2 = -0.121239071f;
-		constexpr float kAtan2C3 =  0.195635925f;
-		constexpr float kAtan2C4 = -0.332994597f;
-		constexpr float kAtan2C5 =  0.999995630f;
+		BX_CONSTEXPR_VAR float kAtan2C0 = -0.013480470f;
+		BX_CONSTEXPR_VAR float kAtan2C1 = 0.057477314f;
+		BX_CONSTEXPR_VAR float kAtan2C2 = -0.121239071f;
+		BX_CONSTEXPR_VAR float kAtan2C3 = 0.195635925f;
+		BX_CONSTEXPR_VAR float kAtan2C4 = -0.332994597f;
+		BX_CONSTEXPR_VAR float kAtan2C5 = 0.999995630f;
 
 	} // namespace
 
@@ -161,11 +162,11 @@ namespace bx
 
 	namespace
 	{
-		constexpr float kExpC0  =  1.66666666666666019037e-01f;
-		constexpr float kExpC1  = -2.77777777770155933842e-03f;
-		constexpr float kExpC2  =  6.61375632143793436117e-05f;
-		constexpr float kExpC3  = -1.65339022054652515390e-06f;
-		constexpr float kExpC4  =  4.13813679705723846039e-08f;
+		BX_CONSTEXPR_VAR float kExpC0 = 1.66666666666666019037e-01f;
+		BX_CONSTEXPR_VAR float kExpC1 = -2.77777777770155933842e-03f;
+		BX_CONSTEXPR_VAR float kExpC2 = 6.61375632143793436117e-05f;
+		BX_CONSTEXPR_VAR float kExpC3 = -1.65339022054652515390e-06f;
+		BX_CONSTEXPR_VAR float kExpC4 = 4.13813679705723846039e-08f;
 
 	} // namespace
 
@@ -195,13 +196,13 @@ namespace bx
 
 	namespace
 	{
-		constexpr float kLogC0 = 6.666666666666735130e-01f;
-		constexpr float kLogC1 = 3.999999999940941908e-01f;
-		constexpr float kLogC2 = 2.857142874366239149e-01f;
-		constexpr float kLogC3 = 2.222219843214978396e-01f;
-		constexpr float kLogC4 = 1.818357216161805012e-01f;
-		constexpr float kLogC5 = 1.531383769920937332e-01f;
-		constexpr float kLogC6 = 1.479819860511658591e-01f;
+		BX_CONSTEXPR_VAR float kLogC0 = 6.666666666666735130e-01f;
+		BX_CONSTEXPR_VAR float kLogC1 = 3.999999999940941908e-01f;
+		BX_CONSTEXPR_VAR float kLogC2 = 2.857142874366239149e-01f;
+		BX_CONSTEXPR_VAR float kLogC3 = 2.222219843214978396e-01f;
+		BX_CONSTEXPR_VAR float kLogC4 = 1.818357216161805012e-01f;
+		BX_CONSTEXPR_VAR float kLogC5 = 1.531383769920937332e-01f;
+		BX_CONSTEXPR_VAR float kLogC6 = 1.479819860511658591e-01f;
 
 	} // namespace
 

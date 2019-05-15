@@ -276,7 +276,11 @@ namespace bx
 	int32_t read(ReaderI* _reader, Ty& _value, Error* _err)
 	{
 		BX_ERROR_SCOPE(_err);
+		#ifdef BX_VS2017
 		BX_STATIC_ASSERT(isTriviallyCopyable<Ty>() );
+		#else
+		assert(isTriviallyCopyable<Ty>());
+		#endif
 		return _reader->read(&_value, sizeof(Ty), _err);
 	}
 

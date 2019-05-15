@@ -7,13 +7,14 @@
 #define BX_UINT32_T_H_HEADER_GUARD
 
 #include "bx.h"
+#include "bx_const.h"
 
 namespace bx
 {
-	constexpr uint16_t kHalfFloatZero = UINT16_C(0);
-	constexpr uint16_t kHalfFloatHalf = UINT16_C(0x3800);
-	constexpr uint16_t kHalfFloatOne  = UINT16_C(0x3c00);
-	constexpr uint16_t kHalfFloatTwo  = UINT16_C(0x4000);
+	BX_CONSTEXPR_VAR uint16_t kHalfFloatZero = UINT16_C(0);
+	BX_CONSTEXPR_VAR uint16_t kHalfFloatHalf = UINT16_C(0x3800);
+	BX_CONSTEXPR_VAR uint16_t kHalfFloatOne = UINT16_C(0x3c00);
+	BX_CONSTEXPR_VAR uint16_t kHalfFloatTwo = UINT16_C(0x4000);
 
 	///
 	BX_CONSTEXPR_FUNC uint32_t uint32_li(uint32_t _a);
