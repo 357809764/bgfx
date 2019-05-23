@@ -1,14 +1,19 @@
 #ifndef _BX_CONST_H_
 #define _BX_CONST_H_
 
-//#define BX_VS2013
-//#define BX_VS2017
-
-#if (_MSC_VER == 1800) // 2013
+#ifndef BX_VS2013
 #define BX_VS2013
-#elif (_MSC_VER >= 1911) // 2013
-#define BX_VS2017
-#endif  
+#endif
+
+//#ifndef BX_VS2017
+//#define BX_VS2017
+//#endif
+
+//#if (_MSC_VER == 1800) // 2013
+//#define BX_VS2013
+//#elif (_MSC_VER >= 1911) // 2013
+//#define BX_VS2017
+//#endif  
 
 
 #ifndef BX_CONSTEXPR
