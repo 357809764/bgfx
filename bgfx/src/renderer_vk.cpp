@@ -2135,6 +2135,10 @@ VK_IMPORT_DEVICE
 		{
 		}
 
+		void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h) override
+		{
+		}
+
 		void updateViewName(ViewId _id, const char* _name) override
 		{
 			bx::strCopy(&s_viewName[_id][BGFX_CONFIG_MAX_VIEW_NAME_RESERVED]

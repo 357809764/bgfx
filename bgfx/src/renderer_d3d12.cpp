@@ -1846,6 +1846,11 @@ namespace bgfx { namespace d3d12
 			DX_RELEASE(readback, 0);
 		}
 
+		void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h) override
+		{
+			//todo
+		}
+
 		void updateViewName(ViewId _id, const char* _name) override
 		{
 			bx::strCopy(&s_viewName[_id][BGFX_CONFIG_MAX_VIEW_NAME_RESERVED]

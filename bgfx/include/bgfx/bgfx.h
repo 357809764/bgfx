@@ -561,6 +561,21 @@ namespace bgfx
 			, bool _yflip
 			) = 0;
 
+		/// Pick color. color format is always 4-byte BGRA.
+		///
+		/// @param[in] _x left
+		/// @param[in] _y top
+		/// @param[in] _w width
+		/// @param[in] _h height
+		/// @param[in] _data color data
+		virtual void pickColor(
+			uint32_t _x,
+			uint32_t _y,
+			uint32_t _w,
+			uint32_t _h,
+			const void* _data
+		) = 0;
+
 		/// Called when a video capture begins.
 		///
 		/// @param[in] _width Image width.
@@ -3998,6 +4013,14 @@ namespace bgfx
 		  FrameBufferHandle _handle
 		, const char* _filePath
 		);
+
+	void requestPickColor(
+		FrameBufferHandle _handle
+		, uint32_t _x
+		, uint32_t _y
+		, uint32_t _w
+		, uint32_t _h
+	);
 
 } // namespace bgfx
 

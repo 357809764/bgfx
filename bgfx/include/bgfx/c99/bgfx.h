@@ -1162,4 +1162,6 @@ BGFX_C_API void bgfx_encoder_blit(struct bgfx_encoder_s* _encoder, bgfx_view_id_
 /**/
 BGFX_C_API void bgfx_request_screen_shot(bgfx_frame_buffer_handle_t _handle, const char* _filePath);
 
+/**/
+BGFX_C_API void bgfx_request_pick_color(bgfx_frame_buffer_handle_t _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h);
 #endif // BGFX_C99_H_HEADER_GUARD

@@ -2957,6 +2957,42 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 			BX_FREE(g_allocator, data);
 		}
 
+		void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h) override
+		{
+			SwapChainGL* swapChain = NULL;
+			uint32_t width = m_resolution.width;
+			uint32_t height = m_resolution.height;
+
+			if (isValid(_handle))
+			{
+				const FrameBufferGL& frameBuffer = m_frameBuffers[_handle.idx];
+				swapChain = frameBuffer.m_swapChain;
+				width = frameBuffer.m_width;
+				height = frameBuffer.m_height;
+			}
+			m_glctx.makeCurrent(swapChain);
+
+			uint32_t length = _w * _h * 4;
+			uint8_t* data = (uint8_t*)BX_ALLOC(g_allocator, length);
+
+			GL_CHECK(glReadPixels(_x
+				, _y
+				, _w
+				, _h
+				, m_readPixelsFmt
+				, GL_UNSIGNED_BYTE
+				, data
+			));
+
+			if (GL_RGBA == m_readPixelsFmt)
+			{
+				bimg::imageSwizzleBgra8(data, _w * 4, _w, _h, data, _w * 4);
+			}
+			g_callback->pickColor(_x, _y, _w, _h, data);
+			
+			BX_FREE(g_allocator, data);
+		}
+
 		void updateViewName(ViewId _id, const char* _name) override
 		{
 			bx::strCopy(&s_viewName[_id][BGFX_CONFIG_MAX_VIEW_NAME_RESERVED]

@@ -1960,6 +1960,11 @@ namespace bgfx { namespace d3d11
 			DX_RELEASE(backBuffer, 0);
 		}
 
+		void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h) override
+		{
+			//todo
+		}
+
 		void updateViewName(ViewId _id, const char* _name) override
 		{
 			if (BX_ENABLED(BGFX_CONFIG_DEBUG_PIX) )

@@ -7,6 +7,9 @@
 #include "bgfx_utils.h"
 #include "imgui/imgui.h"
 
+#pragma warning(disable: 4047 4616 4100 4244)
+
+using namespace bgfx;
 namespace
 {
 
@@ -122,6 +125,101 @@ static const uint64_t s_ptState[]
 };
 BX_STATIC_ASSERT(BX_COUNTOF(s_ptState) == BX_COUNTOF(s_ptNames) );
 
+struct RGBA {
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+	uint8_t a;
+};
+
+static RGBA g_pickColor;
+
+struct CallbackStub : public CallbackI
+{
+	virtual ~CallbackStub()
+	{
+	}
+
+	virtual void fatal(const char* _filePath, uint16_t _line, Fatal::Enum _code, const char* _str) override
+	{
+		
+	}
+
+	virtual void traceVargs(const char* _filePath, uint16_t _line, const char* _format, va_list _argList) override
+	{
+		
+	}
+
+	virtual void profilerBegin(const char* /*_name*/, uint32_t /*_abgr*/, const char* /*_filePath*/, uint16_t /*_line*/) override
+	{
+	}
+
+	virtual void profilerBeginLiteral(const char* /*_name*/, uint32_t /*_abgr*/, const char* /*_filePath*/, uint16_t /*_line*/) override
+	{
+	}
+
+	virtual void profilerEnd() override
+	{
+	}
+
+	virtual uint32_t cacheReadSize(uint64_t /*_id*/) override
+	{
+		return 0;
+	}
+
+	virtual bool cacheRead(uint64_t /*_id*/, void* /*_data*/, uint32_t /*_size*/) override
+	{
+		return false;
+	}
+
+	virtual void cacheWrite(uint64_t /*_id*/, const void* /*_data*/, uint32_t /*_size*/) override
+	{
+	}
+
+	virtual void screenShot(const char* _filePath, uint32_t _width, uint32_t _height, uint32_t _pitch, const void* _data, uint32_t _size, bool _yflip) override
+	{
+		BX_UNUSED(_filePath, _width, _height, _pitch, _data, _size, _yflip);
+
+		
+	}
+
+	virtual void pickColor(uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, const void* _data) override
+	{
+		struct BGRA{
+			uint8_t b;
+			uint8_t g;
+			uint8_t r;
+			uint8_t a;
+		};
+
+		
+
+		BGRA *bgra = (BGRA*)_data;
+		RGBA *rgba = (RGBA*)&g_pickColor;
+
+		rgba->r = bgra->r;
+		rgba->g = bgra->g;
+		rgba->b = bgra->b;
+		rgba->a = bgra->a;
+	}
+
+	virtual void captureBegin(uint32_t /*_width*/, uint32_t /*_height*/, uint32_t /*_pitch*/, TextureFormat::Enum /*_format*/, bool /*_yflip*/) override
+	{
+		BX_TRACE("Warning: using capture without callback (a.k.a. pointless).");
+	}
+
+	virtual void captureEnd() override
+	{
+	}
+
+	virtual void captureFrame(const void* /*_data*/, uint32_t /*_size*/) override
+	{
+	}
+};
+
+CallbackStub callback;
+
+
 class ExampleCubes : public entry::AppI
 {
 public:
@@ -150,6 +248,8 @@ public:
 		init.resolution.width  = m_width;
 		init.resolution.height = m_height;
 		init.resolution.reset  = m_reset;
+		init.callback = &callback;
+		init.type = bgfx::RendererType::OpenGL;
 		bgfx::init(init);
 
 		// Enable debug text.
@@ -244,6 +344,9 @@ public:
 				, uint16_t(m_height)
 				);
 
+			bgfx::FrameBufferHandle handle = { bgfx::kInvalidHandle };
+			bgfx::requestPickColor(handle, m_mouseState.m_mx, m_mouseState.m_my, 1, 1);
+
 			showExampleDialog(this);
 
 			ImGui::SetNextWindowPos(
@@ -251,7 +354,7 @@ public:
 				, ImGuiCond_FirstUseEver
 				);
 			ImGui::SetNextWindowSize(
-				  ImVec2(m_width / 5.0f, m_height / 3.5f)
+				  ImVec2(m_width / 5.0f, m_height / 3.f)
 				, ImGuiCond_FirstUseEver
 				);
 			ImGui::Begin("Settings"
@@ -266,6 +369,14 @@ public:
 
 			ImGui::Text("Primitive topology:");
 			ImGui::Combo("", (int*)&m_pt, s_ptNames, BX_COUNTOF(s_ptNames) );
+
+			const ImVec4 color(
+				g_pickColor.r / 255.0f,
+				g_pickColor.g / 255.0f,
+				g_pickColor.b / 255.0f,
+				g_pickColor.a / 255.0f);
+			const ImVec2 size(30, 30);
+			ImGui::ColorButton("", color, ImGuiColorEditFlags_RGB, size);
 
 			ImGui::End();
 
@@ -358,6 +469,8 @@ public:
 	bool m_g;
 	bool m_b;
 	bool m_a;
+
+	uint32_t m_pick_rgba;
 };
 
 } // namespace

@@ -218,6 +218,10 @@ namespace bgfx { namespace noop
 		{
 		}
 
+		void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h) override
+		{
+		}
+
 		void updateViewName(ViewId /*_id*/, const char* /*_name*/) override
 		{
 		}

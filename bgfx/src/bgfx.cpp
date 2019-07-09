@@ -130,6 +130,11 @@ namespace bgfx
 			}
 		}
 
+		virtual void pickColor(uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, const void* _data) override
+		{
+			BX_UNUSED_5(_x, _y, _w, _h, _data);
+		}
+
 		virtual void captureBegin(uint32_t /*_width*/, uint32_t /*_height*/, uint32_t /*_pitch*/, TextureFormat::Enum /*_format*/, bool /*_yflip*/) override
 		{
 			BX_TRACE("Warning: using capture without callback (a.k.a. pointless).");
@@ -3013,6 +3018,20 @@ namespace bgfx
 					m_renderCtx->requestScreenShot(handle, filePath);
 				}
 				break;
+			case CommandBuffer::RequestPickColor:
+				{
+					FrameBufferHandle handle;
+					_cmdbuf.read(handle);
+
+					uint32_t _x, _y, _w, _h;
+					_cmdbuf.read(_x);
+					_cmdbuf.read(_y);
+					_cmdbuf.read(_w);
+					_cmdbuf.read(_h);
+
+					m_renderCtx->requestPickColor(handle, _x, _y, _w, _h);
+				}
+				break;
 
 			case CommandBuffer::UpdateViewName:
 				{
@@ -4785,6 +4804,12 @@ namespace bgfx
 		BGFX_CHECK_API_THREAD();
 		s_ctx->requestScreenShot(_handle, _filePath);
 	}
+
+	void requestPickColor(
+		FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h) {
+		BGFX_CHECK_API_THREAD();
+		s_ctx->requestPickColor(_handle, _x, _y, _w, _h);
+	}
 } // namespace bgfx
 
 #if BX_PLATFORM_WINDOWS
@@ -5099,6 +5124,11 @@ namespace bgfx
 		virtual void screenShot(const char* _filePath, uint32_t _width, uint32_t _height, uint32_t _pitch, const void* _data, uint32_t _size, bool _yflip) override
 		{
 			m_interface->vtbl->screen_shot(m_interface, _filePath, _width, _height, _pitch, _data, _size, _yflip);
+		}
+
+		virtual void pickColor(uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, const void* _data) override
+		{
+			BX_UNUSED_5(_x, _y, _w, _h, _data);
 		}
 
 		virtual void captureBegin(uint32_t _width, uint32_t _height, uint32_t _pitch, TextureFormat::Enum _format, bool _yflip) override
@@ -6175,6 +6205,12 @@ BGFX_C_API void bgfx_request_screen_shot(bgfx_frame_buffer_handle_t _handle, con
 {
 	union { bgfx_frame_buffer_handle_t c; bgfx::FrameBufferHandle cpp; } handle = { _handle };
 	bgfx::requestScreenShot(handle.cpp, _filePath);
+}
+
+BGFX_C_API void bgfx_request_pick_color(bgfx_frame_buffer_handle_t _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h)
+{
+	union { bgfx_frame_buffer_handle_t c; bgfx::FrameBufferHandle cpp; } handle = { _handle };
+	bgfx::requestPickColor(handle.cpp, _x, _y, _w, _h);
 }
 
 BGFX_C_API bgfx_render_frame_t bgfx_render_frame(int32_t _msecs)
