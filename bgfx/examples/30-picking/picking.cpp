@@ -2,12 +2,15 @@
  * Copyright 2016 Joseph Cherlin. All rights reserved.
  * License: https://github.com/bkaradzic/bgfx#license-bsd-2-clause
  */
+#pragma warning(disable: 4702 4819 4005)
 
 #include "common.h"
 #include "bgfx_utils.h"
 #include "imgui/imgui.h"
 #include <bx/rng.h>
 #include <map>
+
+
 
 namespace
 {

@@ -2687,7 +2687,7 @@ namespace bgfx
 		virtual void createUniform(UniformHandle _handle, UniformType::Enum _type, uint16_t _num, const char* _name) = 0;
 		virtual void destroyUniform(UniformHandle _handle) = 0;
 		virtual void requestScreenShot(FrameBufferHandle _handle, const char* _filePath) = 0;
-		virtual void requestPickColor(FrameBufferHandle _handle, uint32_t x, uint32_t y, uint32_t w, uint32_t h) = 0;
+		virtual void requestPickColor(uint32_t taskId, FrameBufferHandle _handle, uint32_t x, uint32_t y, uint32_t w, uint32_t h) = 0;
 		virtual void updateViewName(ViewId _id, const char* _name) = 0;
 		virtual void updateUniform(uint16_t _loc, const void* _data, uint32_t _size) = 0;
 		virtual void setMarker(const char* _marker, uint32_t _size) = 0;
@@ -4467,7 +4467,7 @@ namespace bgfx
 			cmdbuf.write(_filePath, len);
 		}
 
-		BGFX_API_FUNC(void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h))
+		BGFX_API_FUNC(bool requestPickColor(uint32_t taskId, FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h))
 		{
 			BGFX_MUTEX_SCOPE(m_resourceApiLock);
 
@@ -4479,21 +4479,25 @@ namespace bgfx
 				if (!ref.m_window)
 				{
 					BX_TRACE("requestPickColor can be done only for window frame buffer handles (handle: %d).", _handle.idx);
-					return;
+					return false;
 				}
 			}
 
 			if (_x < 0 || _y < 0 || _w <= 0 || _h <= 0) {
 				BX_TRACE("requestPickColor param error(%d,%d,%d,%d)", _x, _y, _w, _h);
-				return;
+				return false;
 			}
 
 			CommandBuffer& cmdbuf = getCommandBuffer(CommandBuffer::RequestPickColor);
+			
 			cmdbuf.write(_handle);
+			cmdbuf.write(taskId);
 			cmdbuf.write(_x);
 			cmdbuf.write(_y);
 			cmdbuf.write(_w);
 			cmdbuf.write(_h);
+
+			return true;
 		}
 
 		BGFX_API_FUNC(void setPaletteColor(uint8_t _index, const float _rgba[4]) )

@@ -1259,7 +1259,7 @@ namespace bgfx { namespace d3d9
 			DX_RELEASE(surface, 0);
 		}
 
-		void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h) override
+		void requestPickColor(uint32_t taskId, FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h) override
 		{
 			//todo
 		}

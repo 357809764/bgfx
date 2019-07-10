@@ -2625,7 +2625,7 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 				{
 					FrameBufferGL& frameBuffer = m_frameBuffers[m_windows[ii].idx];
 					if (frameBuffer.m_needPresent)
-					{
+					{ 
 						m_glctx.swap(frameBuffer.m_swapChain);
 						frameBuffer.m_needPresent = false;
 					}
@@ -2957,7 +2957,7 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 			BX_FREE(g_allocator, data);
 		}
 
-		void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h) override
+		void requestPickColor(uint32_t taskId, FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h) override
 		{
 			SwapChainGL* swapChain = NULL;
 			uint32_t width = m_resolution.width;
@@ -2970,13 +2970,21 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 				width = frameBuffer.m_width;
 				height = frameBuffer.m_height;
 			}
+
+			if (_x < 0 || _x > width || _y < 0 || _y > height || (_x + _w) > width || (_y + _h) > height) {
+				BX_WARN(1, "request pick color param error:(%d,%d,%d,%d)", _x, _y, _w, _h);
+				g_callback->pickColor(taskId, _x, _y, _w, _h, NULL);
+				return;
+			}
+
 			m_glctx.makeCurrent(swapChain);
 
 			uint32_t length = _w * _h * 4;
 			uint8_t* data = (uint8_t*)BX_ALLOC(g_allocator, length);
 
-			GL_CHECK(glReadPixels(_x
-				, _y
+			GL_CHECK(glReadPixels(
+				_x
+				, height - _y
 				, _w
 				, _h
 				, m_readPixelsFmt
@@ -2988,7 +2996,7 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 			{
 				bimg::imageSwizzleBgra8(data, _w * 4, _w, _h, data, _w * 4);
 			}
-			g_callback->pickColor(_x, _y, _w, _h, data);
+			g_callback->pickColor(taskId, _x, _y, _w, _h, data);
 			
 			BX_FREE(g_allocator, data);
 		}

@@ -20,7 +20,7 @@
 //    misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 //
-
+#pragma warning(disable: 4047 4616 4100 4244)
 #include "common.h"
 #include "bgfx_utils.h"
 
@@ -43,6 +43,86 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 
 namespace
 {
+
+	using namespace bgfx;
+	uint32_t g_pickColor;
+
+	struct CallbackStub : public CallbackI
+	{
+		virtual ~CallbackStub()
+		{
+		}
+
+		virtual void fatal(const char* _filePath, uint16_t _line, Fatal::Enum _code, const char* _str) override
+		{
+
+		}
+
+		virtual void traceVargs(const char* _filePath, uint16_t _line, const char* _format, va_list _argList) override
+		{
+
+		}
+
+		virtual void profilerBegin(const char* /*_name*/, uint32_t /*_abgr*/, const char* /*_filePath*/, uint16_t /*_line*/) override
+		{
+		}
+
+		virtual void profilerBeginLiteral(const char* /*_name*/, uint32_t /*_abgr*/, const char* /*_filePath*/, uint16_t /*_line*/) override
+		{
+		}
+
+		virtual void profilerEnd() override
+		{
+		}
+
+		virtual uint32_t cacheReadSize(uint64_t /*_id*/) override
+		{
+			return 0;
+		}
+
+		virtual bool cacheRead(uint64_t /*_id*/, void* /*_data*/, uint32_t /*_size*/) override
+		{
+			return false;
+		}
+
+		virtual void cacheWrite(uint64_t /*_id*/, const void* /*_data*/, uint32_t /*_size*/) override
+		{
+		}
+
+		virtual void screenShot(const char* _filePath, uint32_t _width, uint32_t _height, uint32_t _pitch, const void* _data, uint32_t _size, bool _yflip) override
+		{
+			BX_UNUSED(_filePath, _width, _height, _pitch, _data, _size, _yflip);
+
+
+		}
+
+		virtual void pickColor(uint32_t taskId, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, const void* _data) override
+		{
+			//rgba
+			uint32_t argb = *(uint32_t*)_data;
+			g_pickColor = argb << 8;
+			g_pickColor |= (argb >> 24) & 0xFF;
+
+			//g_pickColor = bgra;
+
+		}
+
+		virtual void captureBegin(uint32_t /*_width*/, uint32_t /*_height*/, uint32_t /*_pitch*/, TextureFormat::Enum /*_format*/, bool /*_yflip*/) override
+		{
+			BX_TRACE("Warning: using capture without callback (a.k.a. pointless).");
+		}
+
+		virtual void captureEnd() override
+		{
+		}
+
+		virtual void captureFrame(const void* /*_data*/, uint32_t /*_size*/) override
+		{
+		}
+	};
+
+	CallbackStub callback;
+
 
 #define ICON_SEARCH 0x1F50D
 #define ICON_CIRCLED_CROSS 0x2716
@@ -1247,7 +1327,7 @@ public:
 
 		m_width  = _width;
 		m_height = _height;
-		m_debug  = BGFX_DEBUG_NONE;
+		m_debug = BGFX_DEBUG_TEXT;
 		m_reset  = BGFX_RESET_VSYNC;
 
 		bgfx::Init init;
@@ -1256,6 +1336,8 @@ public:
 		init.resolution.width  = m_width;
 		init.resolution.height = m_height;
 		init.resolution.reset  = m_reset;
+		init.callback = &callback;
+		init.type = bgfx::RendererType::OpenGL;
 		bgfx::init(init);
 
 		// Enable debug text.
@@ -1312,7 +1394,20 @@ public:
 
 			showExampleDialog(this);
 
+		   //bgra
+			float rgba[4];
+			rgba[0] = ((g_pickColor >> 24) & 0xFF) / 255.0f;  //r
+			rgba[1] = ((g_pickColor >> 16) & 0xFF) / 255.0f;  //g
+			rgba[2] = ((g_pickColor >> 8) & 0xFF) / 255.0f;   //b
+			rgba[3] = ((g_pickColor >> 0) & 0xFF) / 255.0f;   //a
+			const ImVec4 color(1, 1, 1, 1);
+			const ImVec2 size(30, 30);
+
+			ImGui::ColorButton("", color, ImGuiColorEditFlags_RGB, size);
+			ImGui::ColorEdit4("", rgba, ImGuiColorEditFlags_RGB);
+
 			imguiEndFrame();
+			bgfx::dbgTextPrintf(10, 10, 0xF0, "%x", g_pickColor);
 
 			int64_t now = bx::getHPCounter();
 			const double freq = double(bx::getHPFrequency() );
@@ -1331,9 +1426,18 @@ public:
 
 			nvgEndFrame(m_nvg);
 
+
+			if (m_mouseState.m_buttons[entry::MouseButton::Left]) {
+				bgfx::FrameBufferHandle handle = { bgfx::kInvalidHandle };
+				bgfx::requestPickColor(11, handle, m_mouseState.m_mx, m_mouseState.m_my, 1, 1);
+			}
+
+
 			// Advance to next frame. Rendering thread will be kicked to
 			// process submitted rendering primitives.
 			bgfx::frame();
+
+			
 
 			return true;
 		}

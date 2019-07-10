@@ -125,14 +125,8 @@ static const uint64_t s_ptState[]
 };
 BX_STATIC_ASSERT(BX_COUNTOF(s_ptState) == BX_COUNTOF(s_ptNames) );
 
-struct RGBA {
-	uint8_t r;
-	uint8_t g;
-	uint8_t b;
-	uint8_t a;
-};
 
-static RGBA g_pickColor;
+uint32_t g_pickColor;
 
 struct CallbackStub : public CallbackI
 {
@@ -183,24 +177,14 @@ struct CallbackStub : public CallbackI
 		
 	}
 
-	virtual void pickColor(uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, const void* _data) override
+	virtual void pickColor(uint32_t taskId, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, const void* _data) override
 	{
-		struct BGRA{
-			uint8_t b;
-			uint8_t g;
-			uint8_t r;
-			uint8_t a;
-		};
 
-		
+		uint32_t bgra = *(uint32_t*)_data;
+		g_pickColor = bgra & 0x00FF00FF;
+		g_pickColor |= ((bgra >> 8) & 0xFF) << 24;
+		g_pickColor |= ((bgra >> 24) & 0xFF) << 8;
 
-		BGRA *bgra = (BGRA*)_data;
-		RGBA *rgba = (RGBA*)&g_pickColor;
-
-		rgba->r = bgra->r;
-		rgba->g = bgra->g;
-		rgba->b = bgra->b;
-		rgba->a = bgra->a;
 	}
 
 	virtual void captureBegin(uint32_t /*_width*/, uint32_t /*_height*/, uint32_t /*_pitch*/, TextureFormat::Enum /*_format*/, bool /*_yflip*/) override
@@ -344,8 +328,8 @@ public:
 				, uint16_t(m_height)
 				);
 
-			bgfx::FrameBufferHandle handle = { bgfx::kInvalidHandle };
-			bgfx::requestPickColor(handle, m_mouseState.m_mx, m_mouseState.m_my, 1, 1);
+			
+			
 
 			showExampleDialog(this);
 
@@ -370,13 +354,16 @@ public:
 			ImGui::Text("Primitive topology:");
 			ImGui::Combo("", (int*)&m_pt, s_ptNames, BX_COUNTOF(s_ptNames) );
 
-			const ImVec4 color(
-				g_pickColor.r / 255.0f,
-				g_pickColor.g / 255.0f,
-				g_pickColor.b / 255.0f,
-				g_pickColor.a / 255.0f);
+			float rgba[4];
+			rgba[0] = ((g_pickColor >> 24) & 0xFF) / 255.0f;  //r
+			rgba[1] = ((g_pickColor >> 16) & 0xFF) / 255.0f;  //g
+			rgba[2] = ((g_pickColor >> 8) & 0xFF) / 255.0f;   //b
+			rgba[3] = ((g_pickColor >> 0) & 0xFF) / 255.0f;   //a
+			const ImVec4 color(1, 1, 1, 1);
 			const ImVec2 size(30, 30);
+
 			ImGui::ColorButton("", color, ImGuiColorEditFlags_RGB, size);
+			ImGui::ColorEdit4("", rgba, ImGuiColorEditFlags_RGB);
 
 			ImGui::End();
 
@@ -446,6 +433,11 @@ public:
 			// Advance to next frame. Rendering thread will be kicked to
 			// process submitted rendering primitives.
 			bgfx::frame();
+
+			if (m_mouseState.m_buttons[entry::MouseButton::Left]) {
+				bgfx::FrameBufferHandle handle = { bgfx::kInvalidHandle };
+				bgfx::requestPickColor(11, handle, m_mouseState.m_mx, m_mouseState.m_my, 1, 1);
+			}
 
 			return true;
 		}

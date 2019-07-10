@@ -569,6 +569,7 @@ namespace bgfx
 		/// @param[in] _h height
 		/// @param[in] _data color data
 		virtual void pickColor(
+			uint32_t taskId,
 			uint32_t _x,
 			uint32_t _y,
 			uint32_t _w,
@@ -4014,8 +4015,9 @@ namespace bgfx
 		, const char* _filePath
 		);
 
-	void requestPickColor(
-		FrameBufferHandle _handle
+	bool requestPickColor(
+		uint32_t taskId
+		, FrameBufferHandle _handle
 		, uint32_t _x
 		, uint32_t _y
 		, uint32_t _w
