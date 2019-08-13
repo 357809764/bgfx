@@ -1466,6 +1466,10 @@ namespace bgfx { namespace gl
 		, GLsizei _dim = 16
 		)
 	{
+		if (_format < TextureFormat::RGB8 || _format > TextureFormat::RGBA32F) {
+			return false;
+		}
+
 		const TextureFormatInfo& tfi = s_textureFormat[_format];
 		GLenum internalFmt = _srgb
 			? tfi.m_internalFmtSrgb
