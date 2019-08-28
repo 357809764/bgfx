@@ -34,7 +34,7 @@
 namespace entry
 {
 	///
-	inline void winSetHwnd(::HWND _window)
+	void winSetHwnd(::HWND _window)
 	{
 		bgfx::PlatformData pd;
 		bx::memSet(&pd, 0, sizeof(pd) );

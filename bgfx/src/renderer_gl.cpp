@@ -4224,6 +4224,7 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 			&& s_extension[Extension::ARB_shader_storage_buffer_object].m_supported
 			;
 
+		piqSupported = false; // fyl
 		if (piqSupported)
 		{
 			GL_CHECK(glGetProgramInterfaceiv(m_id, GL_PROGRAM_INPUT,   GL_ACTIVE_RESOURCES, &activeAttribs ) );
