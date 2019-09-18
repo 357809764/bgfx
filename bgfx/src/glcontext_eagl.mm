@@ -28,7 +28,7 @@ namespace bgfx { namespace gl
 			_layer.contentsScale = [UIScreen mainScreen].scale;
 
 			_layer.opaque = [_layer.style valueForKey:@"opaque"] == nil
-				? true
+				? false
 				: [[_layer.style valueForKey:@"opaque"] boolValue]
 				;
 
@@ -166,7 +166,7 @@ namespace bgfx { namespace gl
 
 		BX_UNUSED(_width, _height);
 		CAEAGLLayer* layer = (CAEAGLLayer*)g_platformData.nwh;
-		layer.opaque = [layer.style valueForKey:@"opaque"] == nil ? true : [[layer.style valueForKey:@"opaque"] boolValue];
+		layer.opaque = [layer.style valueForKey:@"opaque"] == nil ? false : [[layer.style valueForKey:@"opaque"] boolValue];
 
 		layer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys
 			: [NSNumber numberWithBool:false]
