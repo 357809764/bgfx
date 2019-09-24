@@ -1960,7 +1960,7 @@ namespace bgfx { namespace d3d11
 			DX_RELEASE(backBuffer, 0);
 		}
 
-		void requestPickColor(uint32_t taskId, FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h) override
+		void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data) override
 		{
 			//todo
 		}

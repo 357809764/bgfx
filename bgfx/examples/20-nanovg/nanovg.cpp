@@ -46,6 +46,7 @@ namespace
 
 	using namespace bgfx;
 	uint32_t g_pickColor;
+	uint32_t g_validFrame;
 
 	struct CallbackStub : public CallbackI
 	{
@@ -93,17 +94,6 @@ namespace
 		{
 			BX_UNUSED(_filePath, _width, _height, _pitch, _data, _size, _yflip);
 
-
-		}
-
-		virtual void pickColor(uint32_t taskId, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, const void* _data) override
-		{
-			//rgba
-			uint32_t argb = *(uint32_t*)_data;
-			g_pickColor = argb << 8;
-			g_pickColor |= (argb >> 24) & 0xFF;
-
-			//g_pickColor = bgra;
 
 		}
 
@@ -1394,12 +1384,11 @@ public:
 
 			showExampleDialog(this);
 
-		   //bgra
 			float rgba[4];
-			rgba[0] = ((g_pickColor >> 24) & 0xFF) / 255.0f;  //r
-			rgba[1] = ((g_pickColor >> 16) & 0xFF) / 255.0f;  //g
-			rgba[2] = ((g_pickColor >> 8) & 0xFF) / 255.0f;   //b
-			rgba[3] = ((g_pickColor >> 0) & 0xFF) / 255.0f;   //a
+			rgba[3] = ((g_pickColor >> 24) & 0xFF) / 255.0f;  //r
+			rgba[2] = ((g_pickColor >> 16) & 0xFF) / 255.0f;  //g
+			rgba[1] = ((g_pickColor >> 8) & 0xFF) / 255.0f;   //b
+			rgba[0] = ((g_pickColor >> 0) & 0xFF) / 255.0f;   //a
 			const ImVec4 color(1, 1, 1, 1);
 			const ImVec2 size(30, 30);
 
@@ -1429,7 +1418,7 @@ public:
 
 			if (m_mouseState.m_buttons[entry::MouseButton::Left]) {
 				bgfx::FrameBufferHandle handle = { bgfx::kInvalidHandle };
-				bgfx::requestPickColor(11, handle, m_mouseState.m_mx, m_mouseState.m_my, 1, 1);
+				g_validFrame = bgfx::requestPickColor(handle, m_mouseState.m_mx, m_mouseState.m_my, 1, 1, (void*)&g_pickColor);
 			}
 
 

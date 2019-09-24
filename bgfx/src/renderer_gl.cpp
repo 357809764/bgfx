@@ -2957,31 +2957,27 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 			BX_FREE(g_allocator, data);
 		}
 
-		void requestPickColor(uint32_t taskId, FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h) override
+		void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data) override
 		{
 			SwapChainGL* swapChain = NULL;
 			uint32_t width = m_resolution.width;
 			uint32_t height = m_resolution.height;
 
+			GLint oldFboId = 0;
+			
 			if (isValid(_handle))
 			{
+				glGetIntegerv(GL_FRAMEBUFFER_BINDING, &oldFboId);
+
 				const FrameBufferGL& frameBuffer = m_frameBuffers[_handle.idx];
 				swapChain = frameBuffer.m_swapChain;
 				width = frameBuffer.m_width;
 				height = frameBuffer.m_height;
+				glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.m_fbo[0]);
 			}
-
-			if (_x < 0 || _x > width || _y < 0 || _y > height || (_x + _w) > width || (_y + _h) > height) {
-				BX_WARN(1, "request pick color param error:(%d,%d,%d,%d)", _x, _y, _w, _h);
-				g_callback->pickColor(taskId, _x, _y, _w, _h, NULL);
-				return;
-			}
-
-			m_glctx.makeCurrent(swapChain);
-
-			uint32_t length = _w * _h * 4;
-			uint8_t* data = (uint8_t*)BX_ALLOC(g_allocator, length);
-
+			//m_glctx.makeCurrent(swapChain);
+			GL_CHECK(glReadBuffer(GL_COLOR_ATTACHMENT0));
+			GL_CHECK(glPixelStorei(GL_PACK_ALIGNMENT, 1));
 			GL_CHECK(glReadPixels(
 				_x
 				, height - _y
@@ -2989,16 +2985,15 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 				, _h
 				, m_readPixelsFmt
 				, GL_UNSIGNED_BYTE
-				, data
+				, _data
 			));
 
+			glBindFramebuffer(GL_FRAMEBUFFER, oldFboId);
+			
 			if (GL_RGBA == m_readPixelsFmt)
 			{
-				bimg::imageSwizzleBgra8(data, _w * 4, _w, _h, data, _w * 4);
+				//bimg::imageSwizzleBgra8(_data, _w * 4, _w, _h, _data, _w * 4);
 			}
-			g_callback->pickColor(taskId, _x, _y, _w, _h, data);
-			
-			BX_FREE(g_allocator, data);
 		}
 
 		void updateViewName(ViewId _id, const char* _name) override

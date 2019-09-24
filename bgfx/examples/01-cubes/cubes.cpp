@@ -9,6 +9,9 @@
 
 #pragma warning(disable: 4047 4616 4100 4244)
 
+static uint32_t globalColorBuf[4];
+static uint32_t validFrames = 0;
+
 using namespace bgfx;
 namespace
 {
@@ -177,16 +180,6 @@ struct CallbackStub : public CallbackI
 		
 	}
 
-	virtual void pickColor(uint32_t taskId, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, const void* _data) override
-	{
-
-		uint32_t bgra = *(uint32_t*)_data;
-		g_pickColor = bgra & 0x00FF00FF;
-		g_pickColor |= ((bgra >> 8) & 0xFF) << 24;
-		g_pickColor |= ((bgra >> 24) & 0xFF) << 8;
-
-	}
-
 	virtual void captureBegin(uint32_t /*_width*/, uint32_t /*_height*/, uint32_t /*_pitch*/, TextureFormat::Enum /*_format*/, bool /*_yflip*/) override
 	{
 		BX_TRACE("Warning: using capture without callback (a.k.a. pointless).");
@@ -314,6 +307,7 @@ public:
 		return 0;
 	}
 
+
 	bool update() override
 	{
 		if (!entry::processEvents(m_width, m_height, m_debug, m_reset, &m_mouseState) )
@@ -355,10 +349,10 @@ public:
 			ImGui::Combo("", (int*)&m_pt, s_ptNames, BX_COUNTOF(s_ptNames) );
 
 			float rgba[4];
-			rgba[0] = ((g_pickColor >> 24) & 0xFF) / 255.0f;  //r
-			rgba[1] = ((g_pickColor >> 16) & 0xFF) / 255.0f;  //g
-			rgba[2] = ((g_pickColor >> 8) & 0xFF) / 255.0f;   //b
-			rgba[3] = ((g_pickColor >> 0) & 0xFF) / 255.0f;   //a
+			rgba[3] = ((g_pickColor >> 24) & 0xFF) / 255.0f;  //r
+			rgba[2] = ((g_pickColor >> 16) & 0xFF) / 255.0f;  //g
+			rgba[1] = ((g_pickColor >> 8) & 0xFF) / 255.0f;   //b
+			rgba[0] = ((g_pickColor >> 0) & 0xFF) / 255.0f;   //a
 			const ImVec4 color(1, 1, 1, 1);
 			const ImVec2 size(30, 30);
 
@@ -432,11 +426,14 @@ public:
 
 			// Advance to next frame. Rendering thread will be kicked to
 			// process submitted rendering primitives.
-			bgfx::frame();
+			uint32_t curFrame = bgfx::frame();
+			if (curFrame == validFrames) {
+				g_pickColor = globalColorBuf[0];
+			}
 
 			if (m_mouseState.m_buttons[entry::MouseButton::Left]) {
 				bgfx::FrameBufferHandle handle = { bgfx::kInvalidHandle };
-				bgfx::requestPickColor(11, handle, m_mouseState.m_mx, m_mouseState.m_my, 1, 1);
+				validFrames = bgfx::requestPickColor(handle, m_mouseState.m_mx, m_mouseState.m_my, 1, 1, (void*)globalColorBuf);
 			}
 
 			return true;
