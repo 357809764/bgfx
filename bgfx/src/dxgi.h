@@ -9,6 +9,9 @@
 #if BX_PLATFORM_WINDOWS || BX_PLATFORM_WINRT
 #	include <d3dcommon.h>
 #	include <dxgi1_6.h>
+#undef NTDDI_VERSION
+#define NTDDI_VERSION  NTDDI_WIN8
+#include <dcomp.h>
 #else
 #	include <d3d11_x.h>
 #endif // BX_PLATFORM_WINDOWS || BX_PLATFORM_WINRT
@@ -24,6 +27,7 @@ namespace bgfx
 	typedef HRESULT (WINAPI* PFN_CREATE_DXGI_FACTORY)(REFIID _riid, void** _factory);
 	typedef HRESULT (WINAPI* PFN_GET_DEBUG_INTERFACE)(REFIID _riid, void** _debug);
 	typedef HRESULT (WINAPI* PFN_GET_DEBUG_INTERFACE1)(UINT _flags, REFIID _riid, void** _debug);
+	typedef HRESULT (WINAPI* PFN_DCompositionCreateDevice)(IDXGIDevice *dxgiDevice, REFIID iid, void **dcompositionDevice);
 
 	struct SwapChainDesc
 	{
@@ -97,12 +101,17 @@ namespace bgfx
 		///
 		void* m_dxgiDll;
 		void* m_dxgiDebugDll;
+		void* m_dcompDll;
 
 		D3D_DRIVER_TYPE   m_driverType;
 		DXGI_ADAPTER_DESC m_adapterDesc;
 		FactoryI* m_factory;
 		AdapterI* m_adapter;
 		OutputI*  m_output;
+
+		//dxgi
+		IDCompositionDevice* m_dcompDevice;
+		IDCompositionTarget* m_target;
 	};
 
 } // namespace bgfx

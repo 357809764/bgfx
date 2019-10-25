@@ -31,6 +31,8 @@
 #	define XINPUT_DLL_A "xinput.dll"
 #endif // XINPUT_DLL_A
 
+#define WS_EX_NOREDIRECTIONBITMAP 0x00200000L
+
 namespace entry
 {
 	///
@@ -470,7 +472,7 @@ namespace entry
 
 			m_windowAlloc.alloc();
 			m_hwnd[0] = CreateWindowExA(
-				  WS_EX_ACCEPTFILES
+				WS_EX_ACCEPTFILES | WS_EX_NOREDIRECTIONBITMAP
 				, "bgfx"
 				, "BGFX"
 				, WS_OVERLAPPEDWINDOW|WS_VISIBLE

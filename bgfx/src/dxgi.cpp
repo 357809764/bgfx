@@ -28,6 +28,8 @@ namespace bgfx
 	static PFN_CREATE_DXGI_FACTORY  CreateDXGIFactory;
 	static PFN_GET_DEBUG_INTERFACE  DXGIGetDebugInterface;
 	static PFN_GET_DEBUG_INTERFACE1 DXGIGetDebugInterface1;
+	static PFN_DCompositionCreateDevice pDCompositionCreateDevice = NULL;
+
 #endif // BX_PLATFORM_WINDOWS
 
 	static const GUID IID_IDXGIFactory    = { 0x7b7166ec, 0x21c7, 0x44ae, { 0xb2, 0x1a, 0xc9, 0xae, 0x32, 0x1a, 0xe3, 0x69 } };
@@ -118,16 +120,25 @@ namespace bgfx
 	Dxgi::Dxgi()
 		: m_dxgiDll(NULL)
 		, m_dxgiDebugDll(NULL)
+		, m_dcompDll(NULL)
 		, m_driverType(D3D_DRIVER_TYPE_NULL)
 		, m_factory(NULL)
 		, m_adapter(NULL)
 		, m_output(NULL)
+		, m_dcompDevice(NULL)
+		, m_target(NULL)
 	{
 	}
 
 	bool Dxgi::init(Caps& _caps)
 	{
 #if BX_PLATFORM_WINDOWS
+		m_dcompDll = bx::dlopen("dcomp.dll");
+		BX_WARN(m_dcompDll == NULL, "%S", "Dont support dcomp.dll");
+		if (m_dcompDll != NULL) {
+			pDCompositionCreateDevice = (PFN_DCompositionCreateDevice)bx::dlsym(m_dcompDll, "DCompositionCreateDevice");
+		}
+
 		m_dxgiDll = bx::dlopen("dxgi.dll");
 		if (NULL == m_dxgiDll)
 		{
@@ -326,9 +337,20 @@ namespace bgfx
 
 	void Dxgi::shutdown()
 	{
+		
 		DX_RELEASE(m_output,  0);
 		DX_RELEASE(m_adapter, 0);
 		DX_RELEASE(m_factory, 0);
+
+		if (m_dcompDevice != NULL) {
+			DX_RELEASE(m_target, 0);
+			DX_RELEASE(m_dcompDevice, 0);
+		}
+
+		if (m_dcompDll != NULL) {
+			bx::dlclose(m_dcompDll);
+			m_dcompDll = NULL;
+		}
 
 		bx::dlclose(m_dxgiDebugDll);
 		m_dxgiDebugDll = NULL;
@@ -377,41 +399,98 @@ namespace bgfx
 			hr = m_factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing) );
 			BX_TRACE("Allow tearing is %ssupported.", allowTearing ? "" : "not ");
 		}
+		
+		if (windowsVersionIs(Condition::GreaterEqual, 0x0602) && pDCompositionCreateDevice != NULL) {
+			DXGI_SWAP_CHAIN_DESC1 sd1;
+			ZeroMemory(&sd1, sizeof(sd1));
+			sd1.Width = _scd.width;
+			sd1.Height = _scd.height;
+			sd1.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			sd1.SampleDesc.Count = 1;
+			sd1.SampleDesc.Quality = 0;
+			sd1.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+			sd1.BufferCount = 2;
+			sd1.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+			sd1.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
+			sd1.Scaling = DXGI_SCALING_STRETCH;
+			sd1.Flags = _scd.flags;
 
-		DXGI_SWAP_CHAIN_DESC scd;
-		scd.BufferDesc.Width  = _scd.width;
-		scd.BufferDesc.Height = _scd.height;
-		scd.BufferDesc.RefreshRate.Numerator   = 1;
-		scd.BufferDesc.RefreshRate.Denominator = 60;
-		scd.BufferDesc.Format = _scd.format;
-		scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-		scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-		scd.SampleDesc.Count   = 1;
-		scd.SampleDesc.Quality = 0;
-		scd.BufferUsage  = _scd.bufferUsage;
-		scd.BufferCount  = _scd.bufferCount;
-		scd.OutputWindow = (HWND)_scd.nwh;
-		scd.Windowed     = _scd.windowed;
-		scd.SwapEffect   = _scd.swapEffect;
-		scd.Flags        = 0
-			| _scd.flags
-			| (allowTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0)
-			;
+			m_factory->CreateSwapChainForComposition(
+				_device,
+				&sd1,
+				nullptr,
+				reinterpret_cast<IDXGISwapChain1**>(_swapChain)
+				);
 
-		hr = m_factory->CreateSwapChain(
-			  _device
-			, &scd
-			, reinterpret_cast<IDXGISwapChain**>(_swapChain)
-			);
+			// dxgi
+			IDXGIDevice1* dxgiDevice1 = NULL;
+			_device->QueryInterface(IID_IDXGIDevice1, (void**)&dxgiDevice1);
+			if (dxgiDevice1 != NULL) {
 
+				IDCompositionVisual* visual;
+				pDCompositionCreateDevice(
+					dxgiDevice1,
+					__uuidof(m_dcompDevice),
+					reinterpret_cast<void**>(&m_dcompDevice)
+					);
+				m_dcompDevice->CreateTargetForHwnd((HWND)_scd.nwh, true, &m_target);
+				m_dcompDevice->CreateVisual(&visual);
+
+				visual->SetContent(*_swapChain);
+				m_target->SetRoot(visual);
+				m_dcompDevice->Commit();
+
+				//DX_RELEASE_I(m_target);
+				DX_RELEASE_I(visual);
+
+				DX_RELEASE_I(m_dcompDevice);
+				DX_RELEASE_I(dxgiDevice1);
+			}
+		}
+		else {
+			DXGI_SWAP_CHAIN_DESC scd;
+			scd.BufferDesc.Width = _scd.width;
+			scd.BufferDesc.Height = _scd.height;
+			scd.BufferDesc.RefreshRate.Numerator = 1;
+			scd.BufferDesc.RefreshRate.Denominator = 60;
+			scd.BufferDesc.Format = _scd.format;
+			scd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+			scd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+			scd.SampleDesc.Count = 1;
+			scd.SampleDesc.Quality = 0;
+			scd.BufferUsage = _scd.bufferUsage;
+			scd.BufferCount = _scd.bufferCount;
+			scd.OutputWindow = (HWND)_scd.nwh;
+			scd.Windowed = _scd.windowed;
+			scd.SwapEffect = _scd.swapEffect;
+			scd.Flags = 0
+				| _scd.flags
+				| (allowTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0)
+				;
+
+			hr = m_factory->CreateSwapChain(
+				_device
+				, &scd
+				, reinterpret_cast<IDXGISwapChain**>(_swapChain)
+				);
+		}
+	
 		if (SUCCEEDED(hr) )
 		{
-			IDXGIDevice1* dxgiDevice1;
-			_device->QueryInterface(IID_IDXGIDevice1, (void**)&dxgiDevice1);
-			if (NULL != dxgiDevice1)
-			{
-				dxgiDevice1->SetMaximumFrameLatency(_scd.maxFrameLatency);
-				DX_RELEASE_I(dxgiDevice1);
+			IDXGIDevice2* dxgiDevice2;
+			_device->QueryInterface(IID_IDXGIDevice2, (void**)&dxgiDevice2);
+			if (NULL != dxgiDevice2) {
+				dxgiDevice2->SetMaximumFrameLatency(_scd.maxFrameLatency);
+				DX_RELEASE_I(dxgiDevice2);
+			}
+			else {
+				IDXGIDevice1* dxgiDevice1;
+				_device->QueryInterface(IID_IDXGIDevice1, (void**)&dxgiDevice1);
+				if (NULL != dxgiDevice1)
+				{
+					dxgiDevice1->SetMaximumFrameLatency(_scd.maxFrameLatency);
+					DX_RELEASE_I(dxgiDevice1);
+				}
 			}
 		}
 #else
@@ -521,6 +600,7 @@ namespace bgfx
 				}
 			}
 		}
+
 #endif // BX_PLATFORM_WINDOWS
 
 		updateHdr10(*_swapChain, _scd);

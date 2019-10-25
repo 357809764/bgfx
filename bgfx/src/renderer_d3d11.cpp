@@ -987,13 +987,14 @@ namespace bgfx { namespace d3d11
 
 					m_scd.bufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 					m_scd.bufferCount = m_swapBufferCount;
-					m_scd.scaling = 0 == g_platformData.ndt
+					m_scd.scaling = 0 == g_platformData.nwh
 						? DXGI_SCALING_NONE
 						: DXGI_SCALING_STRETCH
 						;
 					m_scd.swapEffect = m_swapEffect;
-					m_scd.alphaMode  = DXGI_ALPHA_MODE_IGNORE;
-					m_scd.flags      = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+					//m_scd.alphaMode  = DXGI_ALPHA_MODE_IGNORE;
+					m_scd.alphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
+					m_scd.flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH | DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 
 					m_scd.maxFrameLatency = bx::min<uint8_t>(_init.resolution.maxFrameLatency, 3);
 					m_scd.nwh             = g_platformData.nwh;
@@ -1008,7 +1009,6 @@ namespace bgfx { namespace d3d11
 							, m_scd
 							, &m_swapChain
 							);
-
 						if (FAILED(hr) )
 						{
 							// DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL is not available on win7
