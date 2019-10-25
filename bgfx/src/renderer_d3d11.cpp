@@ -1612,6 +1612,8 @@ namespace bgfx { namespace d3d11
 				m_textures[ii].destroy();
 			}
 
+			m_dxgi.release();
+
 			DX_RELEASE(m_annotation, 1);
 			DX_RELEASE_W(m_infoQueue, 0);
 			DX_RELEASE(m_msaaRt, 0);

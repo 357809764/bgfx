@@ -96,6 +96,9 @@ namespace bgfx
 		HRESULT resizeBuffers(SwapChainI* _swapChain, const SwapChainDesc& _scd, const uint32_t* _nodeMask = NULL, IUnknown* const* _presentQueue = NULL);
 
 		///
+		void release();
+
+		///
 		void trim();
 
 		///
@@ -112,6 +115,7 @@ namespace bgfx
 		//dxgi
 		IDCompositionDevice* m_dcompDevice;
 		IDCompositionTarget* m_target;
+		IDCompositionVisual* m_visual;
 	};
 
 } // namespace bgfx

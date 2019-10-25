@@ -337,20 +337,10 @@ namespace bgfx
 
 	void Dxgi::shutdown()
 	{
-		
-		DX_RELEASE(m_output,  0);
+
+		DX_RELEASE(m_output, 0);
 		DX_RELEASE(m_adapter, 0);
 		DX_RELEASE(m_factory, 0);
-
-		if (m_dcompDevice != NULL) {
-			DX_RELEASE(m_target, 0);
-			DX_RELEASE(m_dcompDevice, 0);
-		}
-
-		if (m_dcompDll != NULL) {
-			bx::dlclose(m_dcompDll);
-			m_dcompDll = NULL;
-		}
 
 		bx::dlclose(m_dxgiDebugDll);
 		m_dxgiDebugDll = NULL;
@@ -427,23 +417,18 @@ namespace bgfx
 			_device->QueryInterface(IID_IDXGIDevice1, (void**)&dxgiDevice1);
 			if (dxgiDevice1 != NULL) {
 
-				IDCompositionVisual* visual;
 				pDCompositionCreateDevice(
 					dxgiDevice1,
 					__uuidof(m_dcompDevice),
 					reinterpret_cast<void**>(&m_dcompDevice)
 					);
 				m_dcompDevice->CreateTargetForHwnd((HWND)_scd.nwh, true, &m_target);
-				m_dcompDevice->CreateVisual(&visual);
+				m_dcompDevice->CreateVisual(&m_visual);
 
-				visual->SetContent(*_swapChain);
-				m_target->SetRoot(visual);
+				m_visual->SetContent(*_swapChain);
+				m_target->SetRoot(m_visual);
 				m_dcompDevice->Commit();
 
-				//DX_RELEASE_I(m_target);
-				DX_RELEASE_I(visual);
-
-				DX_RELEASE_I(m_dcompDevice);
 				DX_RELEASE_I(dxgiDevice1);
 			}
 		}
@@ -720,6 +705,20 @@ namespace bgfx
 		}
 
 		return hr;
+	}
+
+	void Dxgi::release() {
+		
+		if (m_dcompDevice != NULL) {
+			DX_RELEASE(m_visual, 0);
+			DX_RELEASE(m_target, 0);
+			DX_RELEASE(m_dcompDevice, 0);
+		}
+
+		if (m_dcompDll != NULL) {
+			bx::dlclose(m_dcompDll);
+			m_dcompDll = NULL;
+		}
 	}
 
 	void Dxgi::trim()
