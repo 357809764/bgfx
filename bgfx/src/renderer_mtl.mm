@@ -966,8 +966,8 @@ namespace bgfx { namespace mtl
 
 			m_commandBuffer = m_cmd.alloc();
 		}
-
-		void requestPickColor(uint32_t taskId, FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h) override
+        
+        void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void *_data) override
 		{
 			//todo
 		}
