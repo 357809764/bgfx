@@ -35,6 +35,7 @@ public:
 		init.resolution.width  = m_width;
 		init.resolution.height = m_height;
 		init.resolution.reset  = m_reset;
+		init.resolution.maxFrameLatency = 1;
 		bgfx::init(init);
 
 		// Enable debug text.
@@ -63,6 +64,11 @@ public:
 
 	bool update() override
 	{
+		uint32_t result = bgfx::waitRenderFrame(1000);
+		if (result != 0) {
+			result = 0;
+		}
+
 		if (!entry::processEvents(m_width, m_height, m_debug, m_reset, &m_mouseState) )
 		{
 			imguiBeginFrame(m_mouseState.m_mx

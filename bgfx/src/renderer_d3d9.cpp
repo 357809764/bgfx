@@ -938,6 +938,10 @@ namespace bgfx { namespace d3d9
 			m_initialized = false;
 		}
 
+		uint32_t waitRenderFrame(long ms) override {
+			return 0;
+		}
+
 		RendererType::Enum getRendererType() const override
 		{
 			return RendererType::Direct3D9;

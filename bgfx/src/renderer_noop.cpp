@@ -73,6 +73,10 @@ namespace bgfx { namespace noop
 		{
 		}
 
+		uint32_t waitRenderFrame(long ms) override {
+			return 0;
+		}
+
 		RendererType::Enum getRendererType() const override
 		{
 			return RendererType::Noop;

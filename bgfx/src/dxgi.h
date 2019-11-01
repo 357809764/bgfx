@@ -101,6 +101,8 @@ namespace bgfx
 		///
 		void trim();
 
+		DWORD waitOnSwapChain(long ms);
+
 		///
 		void* m_dxgiDll;
 		void* m_dxgiDebugDll;
@@ -116,6 +118,7 @@ namespace bgfx
 		IDCompositionDevice* m_dcompDevice;
 		IDCompositionTarget* m_target;
 		IDCompositionVisual* m_visual;
+		HANDLE				m_waitObject;
 	};
 
 } // namespace bgfx

@@ -2601,6 +2601,10 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 			unloadRenderDoc(m_renderdocdll);
 		}
 
+		uint32_t waitRenderFrame(long ms) override {
+			return 0;
+		}
+
 		RendererType::Enum getRendererType() const override
 		{
 			if (BX_ENABLED(BGFX_CONFIG_RENDERER_OPENGL) )

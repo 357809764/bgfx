@@ -2158,6 +2158,13 @@ namespace bgfx
 		m_frameTimeLast = now;
 	}
 
+	uint32_t Context::waitRenderFrame(long ms) {
+		if (m_rendererInitialized) {
+			return m_renderCtx->waitRenderFrame(ms);
+		}
+		return 0;
+	}
+
 	///
 	RendererContextI* rendererCreate(const Init& _init);
 
@@ -3339,6 +3346,10 @@ namespace bgfx
 		BGFX_CHECK_API_THREAD();
 		BX_CHECK(0 == (_flags&BGFX_RESET_RESERVED_MASK), "Do not set reset reserved flags!");
 		s_ctx->reset(_width, _height, _flags, _format);
+	}
+
+	uint32_t waitRenderFrame(long ms) {
+		return s_ctx->waitRenderFrame(ms);
 	}
 
 	Encoder* begin(bool _forThread)

@@ -992,9 +992,13 @@ namespace bgfx { namespace d3d11
 						: DXGI_SCALING_STRETCH
 						;
 					m_scd.swapEffect = m_swapEffect;
-					//m_scd.alphaMode  = DXGI_ALPHA_MODE_IGNORE;
-					m_scd.alphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
-					m_scd.flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH | DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+					m_scd.alphaMode  = DXGI_ALPHA_MODE_IGNORE;
+					m_scd.flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+					if (windowsVersionIs(Condition::GreaterEqual, 0x0602)) {
+						m_scd.flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+						m_scd.alphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
+					}
 
 					m_scd.maxFrameLatency = bx::min<uint8_t>(_init.resolution.maxFrameLatency, 3);
 					m_scd.nwh             = g_platformData.nwh;
@@ -1015,7 +1019,6 @@ namespace bgfx { namespace d3d11
 							// Try again with DXGI_SWAP_EFFECT_DISCARD
 							m_swapEffect      = DXGI_SWAP_EFFECT_DISCARD;
 							m_swapBufferCount = 1;
-
 							m_scd.bufferCount = m_swapBufferCount;
 							m_scd.swapEffect  = m_swapEffect;
 							hr = m_dxgi.createSwapChain(m_device
@@ -1638,6 +1641,10 @@ namespace bgfx { namespace d3d11
 #endif // USE_D3D11_DYNAMIC_LIB
 		}
 
+		uint32_t waitRenderFrame(long ms) override {
+			return m_dxgi.waitOnSwapChain(ms);
+		}
+
 		RendererType::Enum getRendererType() const override
 		{
 			return RendererType::Direct3D11;
@@ -2225,6 +2232,15 @@ namespace bgfx { namespace d3d11
 						m_deviceCtx->Flush();
 					}
 				}
+				//ID3D11DeviceContext2 *deviceCtx2 = NULL;
+				//m_deviceCtx->QueryInterface(__uuidof(ID3D11DeviceContext2), (void**)&deviceCtx2);
+				//if (deviceCtx2 != NULL) {
+				//	deviceCtx2->DiscardView(m_currentColor);
+				//	deviceCtx2->DiscardView(m_backBufferColor);
+				//	deviceCtx2->DiscardView(m_currentDepthStencil);
+				//	deviceCtx2->DiscardView(m_backBufferDepthStencil);
+				//	deviceCtx2->Release();
+				//}
 
 				m_lost = isLost(hr);
 				BGFX_FATAL(!m_lost
@@ -6288,7 +6304,11 @@ namespace bgfx { namespace d3d11
 			deviceCtx->ResolveSubresource(backBufferColor, 0, m_msaaRt, 0, m_scd.format);
 			DX_RELEASE(backBufferColor, 0);
 		}
+
+		
 	}
+
+
 } /* namespace d3d11 */ } // namespace bgfx
 
 #else

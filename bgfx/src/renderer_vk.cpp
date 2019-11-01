@@ -1945,6 +1945,10 @@ VK_IMPORT_DEVICE
 			unloadRenderDoc(m_renderDocDll);
 		}
 
+		uint32_t waitRenderFrame(long ms) override {
+			return 0;
+		}
+
 		RendererType::Enum getRendererType() const override
 		{
 			return RendererType::Vulkan;

@@ -127,6 +127,7 @@ namespace bgfx
 		, m_output(NULL)
 		, m_dcompDevice(NULL)
 		, m_target(NULL)
+		, m_waitObject(NULL)
 	{
 	}
 
@@ -422,12 +423,15 @@ namespace bgfx
 					__uuidof(m_dcompDevice),
 					reinterpret_cast<void**>(&m_dcompDevice)
 					);
-				m_dcompDevice->CreateTargetForHwnd((HWND)_scd.nwh, true, &m_target);
-				m_dcompDevice->CreateVisual(&m_visual);
+				HRESULT result = m_dcompDevice->CreateTargetForHwnd((HWND)_scd.nwh, true, &m_target);
+				if (result == S_OK) {
 
-				m_visual->SetContent(*_swapChain);
-				m_target->SetRoot(m_visual);
-				m_dcompDevice->Commit();
+					m_dcompDevice->CreateVisual(&m_visual);
+
+					m_visual->SetContent(*_swapChain);
+					m_target->SetRoot(m_visual);
+					m_dcompDevice->Commit();
+				}
 
 				DX_RELEASE_I(dxgiDevice1);
 			}
@@ -476,6 +480,10 @@ namespace bgfx
 					dxgiDevice1->SetMaximumFrameLatency(_scd.maxFrameLatency);
 					DX_RELEASE_I(dxgiDevice1);
 				}
+			}
+
+			if (windowsVersionIs(Condition::GreaterEqual, 0x0602)) {
+				m_waitObject = (*_swapChain)->GetFrameLatencyWaitableObject();
 			}
 		}
 #else
@@ -638,24 +646,24 @@ namespace bgfx
 							BX_TRACE("\tMaxFullFrameLuminance: %f", desc.MaxFullFrameLuminance);
 						}
 
-						DX_RELEASE(output6, 1);
+DX_RELEASE(output6, 1);
 					}
 
 					DX_RELEASE(output, 0);
 				}
 
 				DXGI_HDR_METADATA_HDR10 hdr10;
-				hdr10.RedPrimary[0]   = uint16_t(desc.RedPrimary[0]   * 50000.0f);
-				hdr10.RedPrimary[1]   = uint16_t(desc.RedPrimary[1]   * 50000.0f);
+				hdr10.RedPrimary[0] = uint16_t(desc.RedPrimary[0] * 50000.0f);
+				hdr10.RedPrimary[1] = uint16_t(desc.RedPrimary[1] * 50000.0f);
 				hdr10.GreenPrimary[0] = uint16_t(desc.GreenPrimary[0] * 50000.0f);
 				hdr10.GreenPrimary[1] = uint16_t(desc.GreenPrimary[1] * 50000.0f);
-				hdr10.BluePrimary[0]  = uint16_t(desc.BluePrimary[0]  * 50000.0f);
-				hdr10.BluePrimary[1]  = uint16_t(desc.BluePrimary[1]  * 50000.0f);
-				hdr10.WhitePoint[0]   = uint16_t(desc.WhitePoint[0]   * 50000.0f);
-				hdr10.WhitePoint[1]   = uint16_t(desc.WhitePoint[1]   * 50000.0f);
-				hdr10.MaxMasteringLuminance     = uint32_t(desc.MaxLuminance * 10000.0f);
-				hdr10.MinMasteringLuminance     = uint32_t(desc.MinLuminance * 10000.0f);
-				hdr10.MaxContentLightLevel      = uint16_t(desc.MaxFullFrameLuminance);
+				hdr10.BluePrimary[0] = uint16_t(desc.BluePrimary[0] * 50000.0f);
+				hdr10.BluePrimary[1] = uint16_t(desc.BluePrimary[1] * 50000.0f);
+				hdr10.WhitePoint[0] = uint16_t(desc.WhitePoint[0] * 50000.0f);
+				hdr10.WhitePoint[1] = uint16_t(desc.WhitePoint[1] * 50000.0f);
+				hdr10.MaxMasteringLuminance = uint32_t(desc.MaxLuminance * 10000.0f);
+				hdr10.MinMasteringLuminance = uint32_t(desc.MinLuminance * 10000.0f);
+				hdr10.MaxContentLightLevel = uint16_t(desc.MaxFullFrameLuminance);
 				hdr10.MaxFrameAverageLightLevel = uint16_t(desc.MaxFullFrameLuminance);
 				hr = swapChain4->SetHDRMetaData(DXGI_HDR_METADATA_TYPE_HDR10, sizeof(DXGI_HDR_METADATA_HDR10), &hdr10);
 			}
@@ -663,7 +671,7 @@ namespace bgfx
 			DX_RELEASE(swapChain4, 1);
 		}
 #else
-		BX_UNUSED(_swapChain, _scd);
+BX_UNUSED(_swapChain, _scd);
 #endif // BX_PLATFORM_WINDOWS
 	}
 
@@ -673,10 +681,10 @@ namespace bgfx
 
 #if BX_PLATFORM_WINDOWS
 		if (NULL != _nodeMask
-		&&  NULL != _presentQueue)
+			&&  NULL != _presentQueue)
 		{
 			hr = _swapChain->ResizeBuffers1(
-				  _scd.bufferCount
+				_scd.bufferCount
 				, _scd.width
 				, _scd.height
 				, _scd.format
@@ -691,7 +699,7 @@ namespace bgfx
 			BX_UNUSED(_nodeMask, _presentQueue);
 
 			hr = _swapChain->ResizeBuffers(
-				  _scd.bufferCount
+				_scd.bufferCount
 				, _scd.width
 				, _scd.height
 				, _scd.format
@@ -699,7 +707,7 @@ namespace bgfx
 				);
 		}
 
-		if (SUCCEEDED(hr) )
+		if (SUCCEEDED(hr))
 		{
 			updateHdr10(_swapChain, _scd);
 		}
@@ -708,7 +716,7 @@ namespace bgfx
 	}
 
 	void Dxgi::release() {
-		
+
 		if (m_dcompDevice != NULL) {
 			DX_RELEASE(m_visual, 0);
 			DX_RELEASE(m_target, 0);
@@ -726,12 +734,22 @@ namespace bgfx
 #if BX_PLATFORM_WINDOWS || BX_PLATFORM_WINRT
 		IDXGIDevice3* device;
 		HRESULT hr = m_factory->QueryInterface(IID_IDXGIDevice3, (void**)&device);
-		if (SUCCEEDED(hr) )
+		if (SUCCEEDED(hr))
 		{
 			device->Trim();
 			DX_RELEASE(device, 1);
 		}
 #endif // BX_PLATFORM_WINDOWS || BX_PLATFORM_WINRT
+	}
+
+
+	DWORD Dxgi::waitOnSwapChain(long ms)
+	{
+		if (m_waitObject != NULL) {
+			return WaitForSingleObjectEx(m_waitObject, ms, true);
+		}
+		SetLastError(ERROR_INVALID_HANDLE);
+		return WAIT_FAILED;
 	}
 
 } // namespace bgfx

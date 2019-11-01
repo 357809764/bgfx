@@ -4008,6 +4008,8 @@ namespace bgfx
 		, void* _data
 	);
 
+	uint32_t waitRenderFrame(long ms);
+
 } // namespace bgfx
 
 #endif // BGFX_H_HEADER_GUARD

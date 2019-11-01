@@ -1447,6 +1447,10 @@ namespace bgfx { namespace d3d12
 #endif // USE_D3D12_DYNAMIC_LIB
 		}
 
+		uint32_t waitRenderFrame(long ms) override {
+			return 0;
+		}
+
 		RendererType::Enum getRendererType() const override
 		{
 			return RendererType::Direct3D12;
