@@ -2984,7 +2984,10 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 				glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.m_fbo[0]);
 			}
 			//m_glctx.makeCurrent(swapChain);
-			GL_CHECK(glReadBuffer(GL_COLOR_ATTACHMENT0));
+			if (!BX_ENABLED(BX_PLATFORM_IOS) && !BX_ENABLED(BX_PLATFORM_ANDROID))
+			{
+                GL_CHECK(glReadBuffer(GL_COLOR_ATTACHMENT0) );
+            }
 			GL_CHECK(glPixelStorei(GL_PACK_ALIGNMENT, 1));
 			GL_CHECK(glReadPixels(
 				_x

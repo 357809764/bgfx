@@ -7,7 +7,11 @@
 #include "bgfx_utils.h"
 #include "imgui/imgui.h"
 
-#pragma warning(disable: 4047 4616 4100 4244)
+#ifdef _WIN32
+	#pragma warning(disable: 4047 4616 4100 4244)
+#endif
+
+
 
 static uint32_t globalColorBuf[4];
 static uint32_t validFrames = 0;
@@ -131,71 +135,6 @@ BX_STATIC_ASSERT(BX_COUNTOF(s_ptState) == BX_COUNTOF(s_ptNames) );
 
 uint32_t g_pickColor;
 
-struct CallbackStub : public CallbackI
-{
-	virtual ~CallbackStub()
-	{
-	}
-
-	virtual void fatal(const char* _filePath, uint16_t _line, Fatal::Enum _code, const char* _str) override
-	{
-		
-	}
-
-	virtual void traceVargs(const char* _filePath, uint16_t _line, const char* _format, va_list _argList) override
-	{
-		
-	}
-
-	virtual void profilerBegin(const char* /*_name*/, uint32_t /*_abgr*/, const char* /*_filePath*/, uint16_t /*_line*/) override
-	{
-	}
-
-	virtual void profilerBeginLiteral(const char* /*_name*/, uint32_t /*_abgr*/, const char* /*_filePath*/, uint16_t /*_line*/) override
-	{
-	}
-
-	virtual void profilerEnd() override
-	{
-	}
-
-	virtual uint32_t cacheReadSize(uint64_t /*_id*/) override
-	{
-		return 0;
-	}
-
-	virtual bool cacheRead(uint64_t /*_id*/, void* /*_data*/, uint32_t /*_size*/) override
-	{
-		return false;
-	}
-
-	virtual void cacheWrite(uint64_t /*_id*/, const void* /*_data*/, uint32_t /*_size*/) override
-	{
-	}
-
-	virtual void screenShot(const char* _filePath, uint32_t _width, uint32_t _height, uint32_t _pitch, const void* _data, uint32_t _size, bool _yflip) override
-	{
-		BX_UNUSED(_filePath, _width, _height, _pitch, _data, _size, _yflip);
-
-		
-	}
-
-	virtual void captureBegin(uint32_t /*_width*/, uint32_t /*_height*/, uint32_t /*_pitch*/, TextureFormat::Enum /*_format*/, bool /*_yflip*/) override
-	{
-		BX_TRACE("Warning: using capture without callback (a.k.a. pointless).");
-	}
-
-	virtual void captureEnd() override
-	{
-	}
-
-	virtual void captureFrame(const void* /*_data*/, uint32_t /*_size*/) override
-	{
-	}
-};
-
-CallbackStub callback;
-
 
 class ExampleCubes : public entry::AppI
 {
@@ -225,7 +164,6 @@ public:
 		init.resolution.width  = m_width;
 		init.resolution.height = m_height;
 		init.resolution.reset  = m_reset;
-		init.callback = &callback;
 		init.type = bgfx::RendererType::OpenGL;
 		bgfx::init(init);
 
