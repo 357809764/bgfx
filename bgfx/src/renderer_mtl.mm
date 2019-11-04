@@ -674,6 +674,10 @@ namespace bgfx { namespace mtl
 			m_cmd.shutdown();
 			MTL_RELEASE(m_device);
 		}
+        
+        uint32_t waitRenderFrame(long ms) override {
+            return 0;
+        }
 
 		RendererType::Enum getRendererType() const override
 		{
