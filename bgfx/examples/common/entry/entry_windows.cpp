@@ -475,7 +475,7 @@ namespace entry
 				WS_EX_ACCEPTFILES | WS_EX_NOREDIRECTIONBITMAP
 				, "bgfx"
 				, "BGFX"
-				, WS_OVERLAPPEDWINDOW|WS_VISIBLE
+				, WS_POPUP | WS_VISIBLE
 				, 0
 				, 0
 				, ENTRY_DEFAULT_WIDTH
@@ -485,6 +485,7 @@ namespace entry
 				, instance
 				, 0
 				);
+			ShowWindow(m_hwnd[0], WM_SHOWWINDOW);
 
 			m_flags[0] = 0
 				| ENTRY_WINDOW_FLAG_ASPECT_RATIO

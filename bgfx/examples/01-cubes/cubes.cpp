@@ -225,8 +225,10 @@ public:
 		init.resolution.width  = m_width;
 		init.resolution.height = m_height;
 		init.resolution.reset  = m_reset;
+		init.resolution.maxFrameLatency = 1;
+		init.resolution.numBackBuffers = 2;
 		init.callback = &callback;
-		init.type = bgfx::RendererType::OpenGL;
+		init.type = bgfx::RendererType::Direct3D11;
 		bgfx::init(init);
 
 		// Enable debug text.
@@ -286,6 +288,8 @@ public:
 		m_timeOffset = bx::getHPCounter();
 
 		imguiCreate();
+
+		bgfx::waitRenderFrame(1000);
 	}
 
 	virtual int shutdown() override
@@ -310,6 +314,7 @@ public:
 
 	bool update() override
 	{
+
 		if (!entry::processEvents(m_width, m_height, m_debug, m_reset, &m_mouseState) )
 		{
 			imguiBeginFrame(m_mouseState.m_mx
@@ -322,7 +327,7 @@ public:
 				, uint16_t(m_height)
 				);
 
-			
+			bgfx::waitRenderFrame(1000);
 			
 
 			showExampleDialog(this);

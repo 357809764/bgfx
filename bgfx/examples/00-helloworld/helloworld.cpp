@@ -36,6 +36,7 @@ public:
 		init.resolution.height = m_height;
 		init.resolution.reset  = m_reset;
 		init.resolution.maxFrameLatency = 1;
+		init.resolution.numBackBuffers = 2;
 		bgfx::init(init);
 
 		// Enable debug text.
@@ -50,6 +51,8 @@ public:
 			);
 
 		imguiCreate();
+
+		bgfx::waitRenderFrame(1000);
 	}
 
 	virtual int shutdown() override
