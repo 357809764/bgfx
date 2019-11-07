@@ -1971,7 +1971,78 @@ namespace bgfx { namespace d3d11
 
 		void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data) override
 		{
-			//todo
+			IDXGISwapChain* swapChain = isValid(_handle)
+				? m_frameBuffers[_handle.idx].m_swapChain
+				: m_swapChain
+				;
+
+			if (NULL == swapChain)
+			{
+				BX_TRACE("Unable to request pick color at handle:%d.", _handle.idx);
+				return;
+			}
+
+			ID3D11Texture2D* backBuffer;
+			DX_CHECK(swapChain->GetBuffer(0, IID_ID3D11Texture2D, (void**)&backBuffer));
+
+			D3D11_TEXTURE2D_DESC backBufferDesc;
+			backBuffer->GetDesc(&backBufferDesc);
+
+			D3D11_TEXTURE2D_DESC desc;
+			bx::memCopy(&desc, &backBufferDesc, sizeof(desc));
+			desc.SampleDesc.Count = 1;
+			desc.SampleDesc.Quality = 0;
+			desc.Usage = D3D11_USAGE_STAGING;
+			desc.BindFlags = 0;
+			desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+			desc.Width = _w;
+			desc.Height = _h;
+
+			ID3D11Texture2D* texture;
+			HRESULT hr = m_device->CreateTexture2D(&desc, NULL, &texture);
+			if (SUCCEEDED(hr))
+			{
+				D3D11_BOX sourceRegion;
+				sourceRegion.left = _x;
+				sourceRegion.right = _x + _w;
+				sourceRegion.top = _y;
+				sourceRegion.bottom = _y + _h;
+				sourceRegion.front = 0;
+				sourceRegion.back = 1;
+				m_deviceCtx->CopySubresourceRegion(texture, 0, 0, 0, 0, backBuffer, 0, &sourceRegion);
+
+
+				D3D11_MAPPED_SUBRESOURCE mapped;
+				DX_CHECK(m_deviceCtx->Map(texture, 0, D3D11_MAP_READ, 0, &mapped));
+
+				
+				const uint8_t* srcData = (uint8_t*)mapped.pData;
+				uint8_t* dstData = (uint8_t*)_data;
+
+				for (uint32_t yy = 0; yy < _h; ++yy, srcData += mapped.RowPitch, dstData += (_w*4))
+				{
+					const uint8_t* src = srcData;
+					uint8_t* dst = dstData;
+
+					bx::memCopy(dstData, srcData, _w * 4);
+					
+				}
+
+				/*bimg::imageSwizzleBgra8(
+					mapped.pData
+					, mapped.RowPitch
+					, backBufferDesc.Width
+					, backBufferDesc.Height
+					, mapped.pData
+					, mapped.RowPitch
+					);*/
+			
+				m_deviceCtx->Unmap(texture, 0);
+
+				DX_RELEASE(texture, 0);
+			}
+
+			DX_RELEASE(backBuffer, 0);
 		}
 
 		void updateViewName(ViewId _id, const char* _name) override
