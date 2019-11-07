@@ -391,7 +391,7 @@ namespace bgfx
 			BX_TRACE("Allow tearing is %ssupported.", allowTearing ? "" : "not ");
 		}
 		
-		if (windowsVersionIs(Condition::GreaterEqual, 0x0602) && pDCompositionCreateDevice != NULL) {
+		if (windowsVersionIs(Condition::GreaterEqual, 0x0602)) {
 			DXGI_SWAP_CHAIN_DESC1 sd1;
 			ZeroMemory(&sd1, sizeof(sd1));
 			sd1.Width = _scd.width;
@@ -400,11 +400,13 @@ namespace bgfx
 			sd1.SampleDesc.Count = 1;
 			sd1.SampleDesc.Quality = 0;
 			sd1.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-			sd1.BufferCount = 2;
-			sd1.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-			sd1.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
-			sd1.Scaling = DXGI_SCALING_STRETCH;
-			sd1.Flags = _scd.flags;
+			sd1.BufferCount = _scd.bufferCount;
+			sd1.SwapEffect = _scd.swapEffect;
+			sd1.AlphaMode = _scd.alphaMode;
+			sd1.Scaling = _scd.scaling;
+			sd1.Flags = 0
+				| _scd.flags
+				| (allowTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0);
 
 			m_factory->CreateSwapChainForComposition(
 				_device,
@@ -413,11 +415,15 @@ namespace bgfx
 				reinterpret_cast<IDXGISwapChain1**>(_swapChain)
 				);
 
+		
+
 			// dxgi
 			IDXGIDevice1* dxgiDevice1 = NULL;
 			_device->QueryInterface(IID_IDXGIDevice1, (void**)&dxgiDevice1);
 			if (dxgiDevice1 != NULL) {
-
+				if (pDCompositionCreateDevice == NULL) {
+					return S_FALSE;
+				}
 				pDCompositionCreateDevice(
 					dxgiDevice1,
 					__uuidof(m_dcompDevice),
