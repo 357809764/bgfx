@@ -648,6 +648,7 @@ namespace bgfx { namespace d3d11
 			, m_ags(NULL)
 			, m_featureLevel(D3D_FEATURE_LEVEL(0) )
 			, m_swapChain(NULL)
+			, m_compTarget(NULL)
 			, m_lost(false)
 			, m_numWindows(0)
 			, m_device(NULL)
@@ -935,10 +936,10 @@ namespace bgfx { namespace d3d11
 				{
 					ID3D11Device* device;
 					HRESULT hr = m_device->QueryInterface(s_d3dDeviceIIDs[ii], (void**)&device);
-					if (SUCCEEDED(hr) )
+					if (SUCCEEDED(hr))
 					{
 						device->Release(); // BK - ignore ref count.
-						m_deviceInterfaceVersion = BX_COUNTOF(s_d3dDeviceIIDs)-ii;
+						m_deviceInterfaceVersion = BX_COUNTOF(s_d3dDeviceIIDs) - ii;
 						break;
 					}
 				}
@@ -946,7 +947,7 @@ namespace bgfx { namespace d3d11
 				{ ///
 					IDXGIDevice* renderdoc;
 					HRESULT hr = m_device->QueryInterface(IID_IDXGIDeviceRenderDoc, (void**)&renderdoc);
-					if (SUCCEEDED(hr) )
+					if (SUCCEEDED(hr))
 					{
 						setGraphicsDebuggerPresent(true);
 						DX_RELEASE(renderdoc, 2);
@@ -954,7 +955,7 @@ namespace bgfx { namespace d3d11
 					else
 					{
 						IUnknown* device = m_device;
-						setGraphicsDebuggerPresent(2 != getRefCount(device) );
+						setGraphicsDebuggerPresent(2 != getRefCount(device));
 					}
 				}
 
@@ -977,13 +978,13 @@ namespace bgfx { namespace d3d11
 
 					m_swapBufferCount = bx::clamp<uint8_t>(_init.resolution.numBackBuffers, 2, BGFX_CONFIG_MAX_BACK_BUFFERS);
 
-					bx::memSet(&m_scd, 0, sizeof(m_scd) );
-					m_scd.width  = _init.resolution.width;
+					bx::memSet(&m_scd, 0, sizeof(m_scd));
+					m_scd.width = _init.resolution.width;
 					m_scd.height = _init.resolution.height;
 					m_scd.format = s_textureFormat[_init.resolution.format].m_fmt;
 
 					updateMsaa(m_scd.format);
-					m_scd.sampleDesc  = s_msaa[(_init.resolution.reset&BGFX_RESET_MSAA_MASK)>>BGFX_RESET_MSAA_SHIFT];
+					m_scd.sampleDesc = s_msaa[(_init.resolution.reset&BGFX_RESET_MSAA_MASK) >> BGFX_RESET_MSAA_SHIFT];
 
 					m_scd.bufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 					m_scd.bufferCount = m_swapBufferCount;
@@ -992,7 +993,7 @@ namespace bgfx { namespace d3d11
 						: DXGI_SCALING_STRETCH
 						;
 					m_scd.swapEffect = m_swapEffect;
-					m_scd.alphaMode  = DXGI_ALPHA_MODE_IGNORE;
+					m_scd.alphaMode = DXGI_ALPHA_MODE_IGNORE;
 					m_scd.flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 					if (windowsVersionIs(Condition::GreaterEqual, 0x0602)) {
@@ -1001,9 +1002,9 @@ namespace bgfx { namespace d3d11
 					}
 
 					m_scd.maxFrameLatency = bx::min<uint8_t>(_init.resolution.maxFrameLatency, 3);
-					m_scd.nwh             = g_platformData.nwh;
-					m_scd.ndt             = g_platformData.ndt;
-					m_scd.windowed        = true;
+					m_scd.nwh = g_platformData.nwh;
+					m_scd.ndt = g_platformData.ndt;
+					m_scd.windowed = true;
 
 					m_msaaRt = NULL;
 
@@ -1012,7 +1013,13 @@ namespace bgfx { namespace d3d11
 						hr = m_dxgi.createSwapChain(m_device
 							, m_scd
 							, &m_swapChain
+							, &m_compTarget
 							);
+						if (SUCCEEDED(hr)) {
+							if (windowsVersionIs(Condition::GreaterEqual, 0x0602)) {
+								m_waitObject = m_swapChain->GetFrameLatencyWaitableObject();
+							}
+						}
 						if (FAILED(hr) )
 						{
 							// DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL is not available on win7
@@ -1024,6 +1031,7 @@ namespace bgfx { namespace d3d11
 							hr = m_dxgi.createSwapChain(m_device
 								, m_scd
 								, &m_swapChain
+								, &m_compTarget
 								);
 
 							if (FAILED(hr) )
@@ -1615,6 +1623,7 @@ namespace bgfx { namespace d3d11
 				m_textures[ii].destroy();
 			}
 
+			DX_RELEASE(m_compTarget, 0);
 			m_dxgi.release();
 
 			DX_RELEASE(m_annotation, 1);
@@ -1642,7 +1651,12 @@ namespace bgfx { namespace d3d11
 		}
 
 		uint32_t waitRenderFrame(long ms) override {
-			return m_dxgi.waitOnSwapChain(ms);
+
+			if (m_waitObject != NULL) {
+				return WaitForSingleObjectEx(m_waitObject, ms, true);
+			}
+			SetLastError(ERROR_INVALID_HANDLE);
+			return WAIT_FAILED;
 		}
 
 		RendererType::Enum getRendererType() const override
@@ -2475,6 +2489,7 @@ namespace bgfx { namespace d3d11
 						HRESULT hr = m_dxgi.createSwapChain(m_device
 							, m_scd
 							, &m_swapChain
+							, &m_compTarget
 							);
 						BGFX_FATAL(SUCCEEDED(hr), bgfx::Fatal::UnableToInitialize, "Failed to create swap chain.");
 					}
@@ -3500,7 +3515,9 @@ namespace bgfx { namespace d3d11
 
 		D3D_FEATURE_LEVEL m_featureLevel;
 
+		HANDLE m_waitObject;
 		Dxgi::SwapChainI* m_swapChain;
+		IDCompositionTarget* m_compTarget;
 		ID3D11Texture2D*  m_msaaRt;
 
 		bool m_needPresent;
@@ -4681,6 +4698,7 @@ namespace bgfx { namespace d3d11
 		HRESULT hr = s_renderD3D11->m_dxgi.createSwapChain(device
 			, scd
 			, &m_swapChain
+			, &m_compTarget
 			);
 		BGFX_FATAL(SUCCEEDED(hr), Fatal::UnableToInitialize, "Failed to create swap chain.");
 
@@ -4728,7 +4746,7 @@ namespace bgfx { namespace d3d11
 	uint16_t FrameBufferD3D11::destroy()
 	{
 		preReset(true);
-
+		DX_RELEASE(m_compTarget, 0)
 		DX_RELEASE(m_swapChain, 0);
 
 		m_num   = 0;

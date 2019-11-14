@@ -126,8 +126,6 @@ namespace bgfx
 		, m_adapter(NULL)
 		, m_output(NULL)
 		, m_dcompDevice(NULL)
-		, m_target(NULL)
-		, m_waitObject(NULL)
 	{
 	}
 
@@ -376,7 +374,7 @@ namespace bgfx
 
 	static const GUID IID_ID3D12CommandQueue = { 0x0ec870a6, 0x5d7e, 0x4c22, { 0x8c, 0xfc, 0x5b, 0xaa, 0xe0, 0x76, 0x16, 0xed } };
 
-	HRESULT Dxgi::createSwapChain(IUnknown* _device, const SwapChainDesc& _scd, SwapChainI** _swapChain)
+	HRESULT Dxgi::createSwapChain(IUnknown* _device, const SwapChainDesc& _scd, SwapChainI** _swapChain, IDCompositionTarget** _compTarget)
 	{
 		HRESULT hr = S_OK;
 
@@ -424,19 +422,19 @@ namespace bgfx
 				if (pDCompositionCreateDevice == NULL) {
 					return S_FALSE;
 				}
-				pDCompositionCreateDevice(
-					dxgiDevice1,
-					__uuidof(m_dcompDevice),
-					reinterpret_cast<void**>(&m_dcompDevice)
-					);
-				HRESULT result = m_dcompDevice->CreateTargetForHwnd((HWND)_scd.nwh, true, &m_target);
+				if (m_dcompDevice == NULL) {
+					pDCompositionCreateDevice(dxgiDevice1, __uuidof(m_dcompDevice), reinterpret_cast<void**>(&m_dcompDevice));
+				}
+				
+				HRESULT result = m_dcompDevice->CreateTargetForHwnd((HWND)_scd.nwh, true, _compTarget);
 				if (result == S_OK) {
+					IDCompositionVisual* visual;
+					m_dcompDevice->CreateVisual(&visual);
 
-					m_dcompDevice->CreateVisual(&m_visual);
-
-					m_visual->SetContent(*_swapChain);
-					m_target->SetRoot(m_visual);
+					visual->SetContent(*_swapChain);
+					(*_compTarget)->SetRoot(visual);
 					m_dcompDevice->Commit();
+					DX_RELEASE_I(visual);
 				}
 
 				DX_RELEASE_I(dxgiDevice1);
@@ -488,9 +486,6 @@ namespace bgfx
 				}
 			}
 
-			if (windowsVersionIs(Condition::GreaterEqual, 0x0602)) {
-				m_waitObject = (*_swapChain)->GetFrameLatencyWaitableObject();
-			}
 		}
 #else
 		DXGI_SWAP_CHAIN_DESC1 scd;
@@ -724,8 +719,6 @@ BX_UNUSED(_swapChain, _scd);
 	void Dxgi::release() {
 
 		if (m_dcompDevice != NULL) {
-			DX_RELEASE(m_visual, 0);
-			DX_RELEASE(m_target, 0);
 			DX_RELEASE(m_dcompDevice, 0);
 		}
 
@@ -748,15 +741,6 @@ BX_UNUSED(_swapChain, _scd);
 #endif // BX_PLATFORM_WINDOWS || BX_PLATFORM_WINRT
 	}
 
-
-	DWORD Dxgi::waitOnSwapChain(long ms)
-	{
-		if (m_waitObject != NULL) {
-			return WaitForSingleObjectEx(m_waitObject, ms, true);
-		}
-		SetLastError(ERROR_INVALID_HANDLE);
-		return WAIT_FAILED;
-	}
 
 } // namespace bgfx
 

@@ -337,6 +337,7 @@ namespace bgfx { namespace d3d12
 	{
 		FrameBufferD3D12()
 			: m_swapChain(NULL)
+			, m_compTarget(NULL)
 			, m_nwh(NULL)
 			, m_width(0)
 			, m_height(0)
@@ -362,6 +363,7 @@ namespace bgfx { namespace d3d12
 		TextureHandle m_texture[BGFX_CONFIG_MAX_FRAME_BUFFER_ATTACHMENTS];
 		TextureHandle m_depth;
 		Dxgi::SwapChainI* m_swapChain;
+		IDCompositionTarget* m_compTarget;
 		void* m_nwh;
 		uint32_t m_width;
 		uint32_t m_height;

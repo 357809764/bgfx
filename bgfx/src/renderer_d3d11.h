@@ -305,6 +305,7 @@ namespace bgfx { namespace d3d11
 		FrameBufferD3D11()
 			: m_dsv(NULL)
 			, m_swapChain(NULL)
+			, m_compTarget(NULL)
 			, m_nwh(NULL)
 			, m_width(0)
 			, m_height(0)
@@ -329,6 +330,7 @@ namespace bgfx { namespace d3d11
 		ID3D11ShaderResourceView* m_srv[BGFX_CONFIG_MAX_FRAME_BUFFER_ATTACHMENTS-1];
 		ID3D11DepthStencilView* m_dsv;
 		Dxgi::SwapChainI* m_swapChain;
+		IDCompositionTarget* m_compTarget;
 		void* m_nwh;
 		uint32_t m_width;
 		uint32_t m_height;

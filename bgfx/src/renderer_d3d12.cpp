@@ -646,6 +646,7 @@ namespace bgfx { namespace d3d12
 			, m_winPixEvent(NULL)
 			, m_featureLevel(D3D_FEATURE_LEVEL(0) )
 			, m_swapChain(NULL)
+			, m_compTarget(NULL)
 			, m_wireframe(false)
 			, m_lost(false)
 			, m_maxAnisotropy(1)
@@ -947,6 +948,7 @@ namespace bgfx { namespace d3d12
 						  getDeviceForSwapChain()
 						, m_scd
 						, &m_swapChain
+						, &m_compTarget
 						);
 
 
@@ -2241,6 +2243,7 @@ namespace bgfx { namespace d3d12
 							  getDeviceForSwapChain()
 							, m_scd
 							, &m_swapChain
+							, &m_compTarget
 							);
 						BGFX_FATAL(SUCCEEDED(hr), bgfx::Fatal::UnableToInitialize, "Failed to create swap chain.");
 					}
@@ -3285,6 +3288,7 @@ namespace bgfx { namespace d3d12
 		D3D12_FEATURE_DATA_D3D12_OPTIONS m_options;
 
 		Dxgi::SwapChainI* m_swapChain;
+		IDCompositionTarget* m_compTarget;
 		ID3D12Resource*   m_msaaRt;
 
 #if BX_PLATFORM_WINDOWS
@@ -5048,6 +5052,7 @@ namespace bgfx { namespace d3d12
 			  s_renderD3D12->getDeviceForSwapChain()
 			, scd
 			, &m_swapChain
+			, &m_compTarget
 			);
 		BGFX_FATAL(SUCCEEDED(hr), Fatal::UnableToInitialize, "Failed to create swap chain.");
 		m_state = D3D12_RESOURCE_STATE_PRESENT;
@@ -5083,6 +5088,7 @@ namespace bgfx { namespace d3d12
 
 	uint16_t FrameBufferD3D12::destroy()
 	{
+		DX_RELEASE(m_compTarget, 0);
 		DX_RELEASE(m_swapChain, 0);
 
 		m_nwh   = NULL;

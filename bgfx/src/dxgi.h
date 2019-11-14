@@ -87,7 +87,7 @@ namespace bgfx
 		void update(IUnknown* _device);
 
 		///
-		HRESULT createSwapChain(IUnknown* _device, const SwapChainDesc& _scd, SwapChainI** _swapChain);
+		HRESULT createSwapChain(IUnknown* _device, const SwapChainDesc& _scd, SwapChainI** _swapChain, IDCompositionTarget** _compTarget);
 
 		///
 		void updateHdr10(SwapChainI* _swapChain, const SwapChainDesc& _scd);
@@ -100,8 +100,6 @@ namespace bgfx
 
 		///
 		void trim();
-
-		DWORD waitOnSwapChain(long ms);
 
 		///
 		void* m_dxgiDll;
@@ -116,9 +114,6 @@ namespace bgfx
 
 		//dxgi
 		IDCompositionDevice* m_dcompDevice;
-		IDCompositionTarget* m_target;
-		IDCompositionVisual* m_visual;
-		HANDLE				m_waitObject;
 	};
 
 } // namespace bgfx
