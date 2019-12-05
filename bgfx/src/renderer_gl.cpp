@@ -2642,6 +2642,7 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 				if (m_needPresent)
 				{
 					// Ensure the back buffer is bound as the source of the flip
+					m_glctx.makeCurrent(NULL);
 					GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, m_backBufferFbo));
 
 					m_glctx.swap();
@@ -3244,6 +3245,9 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 					m_glctx.makeCurrent(frameBuffer.m_swapChain);
 					frameBuffer.m_needPresent = true;
 					m_currentFbo = 0;
+					#if BX_PLATFORM_IOS
+						m_currentFbo 	= frameBuffer.m_fbo[0];
+					#endif
 				}
 				else
 				{
@@ -6095,6 +6099,7 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 		}
 	}
 
+
 	void FrameBufferGL::create(uint16_t _denseIdx, void* _nwh, uint32_t _width, uint32_t _height, TextureFormat::Enum _format, TextureFormat::Enum _depthFormat)
 	{
 		BX_UNUSED(_format, _depthFormat);
@@ -6104,6 +6109,9 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 		m_numTh     = 0;
 		m_denseIdx  = _denseIdx;
 		m_needPresent = false;
+		#if BX_PLATFORM_IOS
+		m_fbo[0] 	= s_renderGL->m_glctx.getFbo(m_swapChain);
+		#endif
 	}
 
 	uint16_t FrameBufferGL::destroy()

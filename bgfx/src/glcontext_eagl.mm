@@ -354,6 +354,11 @@ namespace bgfx { namespace gl
 		}
 	}
 
+	GLuint GlContext::getFbo(SwapChainGL* _swapChain)
+	{
+		return _swapChain->m_fbo;
+	}
+
 	void GlContext::import()
 	{
 		BX_TRACE("Import:");

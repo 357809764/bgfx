@@ -40,6 +40,8 @@ namespace bgfx { namespace gl
 			return m_fbo;
 		}
 
+		GLuint getFbo(SwapChainGL* _swapChain);
+
 		bool isValid() const
 		{
 			return 0 != m_context;

@@ -976,6 +976,11 @@ namespace bgfx { namespace mtl
 			//todo
 		}
 
+        uint32_t waitRenderFrame(long ms) override {
+            //todo
+            return 0;
+            }
+
 		void updateViewName(ViewId _id, const char* _name) override
 		{
 			if (BX_ENABLED(BGFX_CONFIG_DEBUG_PIX) )
