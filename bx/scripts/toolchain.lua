@@ -162,8 +162,10 @@ function toolchain(_buildDir, _libDir)
 		os.exit(1)
 	end
 
+	local androidApi = 19
 	local androidPlatform = "android-19"
 	if _OPTIONS["with-android"] then
+		androidApi = _OPTIONS["with-android"]
 		androidPlatform = "android-" .. _OPTIONS["with-android"]
 	end
 
@@ -313,7 +315,7 @@ function toolchain(_buildDir, _libDir)
 		elseif "linux-steamlink" == _OPTIONS["gcc"] then
 			if not os.getenv("MARVELL_SDK_PATH") then
 				print("Set MARVELL_SDK_PATH environment variable.")
-			end
+			end     
 
 			premake.gcc.cc  = "$(MARVELL_SDK_PATH)/toolchain/bin/armv7a-cros-linux-gnueabi-gcc"
 			premake.gcc.cxx = "$(MARVELL_SDK_PATH)/toolchain/bin/armv7a-cros-linux-gnueabi-g++"
@@ -821,6 +823,9 @@ function toolchain(_buildDir, _libDir)
 		}
 		linkoptions {
 			"-nostdlib",
+		}
+		defines {
+			"__ANDROID_API__=" .. androidApi
 		}
 		links {
 			"c",

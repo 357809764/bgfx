@@ -11,6 +11,16 @@
 #	include <string.h> // memcpy, memmove, memset
 #endif // !BX_CRT_NONE
 
+#if __ANDROID_API__ >= __ANDROID_API_M__
+
+#pragma message("API >= M")
+
+#else
+
+#pragma message("API < M")
+
+#endif
+
 namespace bx
 {
 	void swap(void* _a, void* _b, size_t _numBytes)
