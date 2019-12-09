@@ -1,5 +1,5 @@
 --
--- Copyright 2010-2018 Branimir Karadzic. All rights reserved.
+-- Copyright 2010-2019 Branimir Karadzic. All rights reserved.
 -- License: https://github.com/bkaradzic/bx#license-bsd-2-clause
 --
 
@@ -50,6 +50,7 @@ function toolchain(_buildDir, _libDir)
 		description = "Choose GCC flavor",
 		allowed = {
 			{ "android-arm",     "Android - ARM"              },
+			{ "android-arm64",   "Android - ARM64"            },
 			{ "android-x86",     "Android - x86"              },
 			{ "asmjs",           "Emscripten/asm.js"          },
 			{ "freebsd",         "FreeBSD"                    },
@@ -220,6 +221,21 @@ function toolchain(_buildDir, _libDir)
 			premake.gcc.llvm = true
 			location (path.join(_buildDir, "projects", _ACTION .. "-android-arm"))
 
+		elseif "android-arm64" == _OPTIONS["gcc"] then
+
+			if not os.getenv("ANDROID_NDK_ARM64")
+			or not os.getenv("ANDROID_NDK_CLANG")
+			or not os.getenv("ANDROID_NDK_ROOT") then
+				print("Set ANDROID_NDK_CLANG, ANDROID_NDK_ARM64, and ANDROID_NDK_ROOT environment variables.")
+			end
+
+			premake.gcc.cc   = "$(ANDROID_NDK_CLANG)/bin/clang"
+			premake.gcc.cxx  = "$(ANDROID_NDK_CLANG)/bin/clang++"
+			premake.gcc.ar   = "$(ANDROID_NDK_ARM64)/bin/aarch64-linux-android-ar"
+
+			premake.gcc.llvm = true
+			location (path.join(_buildDir, "projects", _ACTION .. "-android-arm64"))
+
 		elseif "android-x86" == _OPTIONS["gcc"] then
 
 			if not os.getenv("ANDROID_NDK_X86")
@@ -230,18 +246,19 @@ function toolchain(_buildDir, _libDir)
 
 			premake.gcc.cc   = "$(ANDROID_NDK_CLANG)/bin/clang"
 			premake.gcc.cxx  = "$(ANDROID_NDK_CLANG)/bin/clang++"
+			premake.gcc.ar   = "$(ANDROID_NDK_X86)/bin/i686-linux-android-ar"
 			premake.gcc.llvm = true
 			location (path.join(_buildDir, "projects", _ACTION .. "-android-x86"))
 
 		elseif "asmjs" == _OPTIONS["gcc"] then
 
-			if not os.getenv("EMSCRIPTEN") then
-				print("Set EMSCRIPTEN environment variable.")
+			if not os.getenv("EMSDK") then
+				print("Set EMSDK environment variable.")
 			end
 
-			premake.gcc.cc   = "\"$(EMSCRIPTEN)/emcc\""
-			premake.gcc.cxx  = "\"$(EMSCRIPTEN)/em++\""
-			premake.gcc.ar   = "\"$(EMSCRIPTEN)/emar\""
+			premake.gcc.cc   = "\"$(EMSDK)/fastcomp/bin/emcc\""
+			premake.gcc.cxx  = "\"$(EMSDK)/fastcomp/bin/em++\""
+			premake.gcc.ar   = "\"$(EMSDK)/fastcomp/bin/emar\""
 			premake.gcc.llvm = true
 			location (path.join(_buildDir, "projects", _ACTION .. "-asmjs"))
 
@@ -315,7 +332,7 @@ function toolchain(_buildDir, _libDir)
 		elseif "linux-steamlink" == _OPTIONS["gcc"] then
 			if not os.getenv("MARVELL_SDK_PATH") then
 				print("Set MARVELL_SDK_PATH environment variable.")
-			end     
+			end
 
 			premake.gcc.cc  = "$(MARVELL_SDK_PATH)/toolchain/bin/armv7a-cros-linux-gnueabi-gcc"
 			premake.gcc.cxx = "$(MARVELL_SDK_PATH)/toolchain/bin/armv7a-cros-linux-gnueabi-g++"
@@ -393,6 +410,7 @@ function toolchain(_buildDir, _libDir)
 		or _ACTION == "vs2013"
 		or _ACTION == "vs2015"
 		or _ACTION == "vs2017"
+		or _ACTION == "vs2019"
 		then
 
 		local action = premake.action.current()
@@ -537,8 +555,6 @@ function toolchain(_buildDir, _libDir)
 			"WIN32",
 			"_WIN32",
 			"_HAS_EXCEPTIONS=0",
-			"_HAS_ITERATOR_DEBUGGING=0",
-			"_ITERATOR_DEBUG_LEVEL=0",
 			"_SCL_SECURE=0",
 			"_SECURE_SCL=0",
 			"_SCL_SECURE_NO_WARNINGS",
@@ -635,8 +651,9 @@ function toolchain(_buildDir, _libDir)
 			"-Wunused-value",
 			"-Wundef",
 		}
+
 		buildoptions_cpp {
-			"-std=c++14",
+			"-std=c++11",
 		}
 		linkoptions {
 			"-Wl,--gc-sections",
@@ -666,9 +683,9 @@ function toolchain(_buildDir, _libDir)
 
 	configuration { "mingw-clang" }
 		buildoptions {
-			"-isystem$(MINGW)/lib/gcc/x86_64-w64-mingw32/4.8.1/include/c++",
-			"-isystem$(MINGW)/lib/gcc/x86_64-w64-mingw32/4.8.1/include/c++/x86_64-w64-mingw32",
-			"-isystem$(MINGW)/x86_64-w64-mingw32/include",
+			"-isystem $(MINGW)/lib/gcc/x86_64-w64-mingw32/4.8.1/include/c++",
+			"-isystem $(MINGW)/lib/gcc/x86_64-w64-mingw32/4.8.1/include/c++/x86_64-w64-mingw32",
+			"-isystem $(MINGW)/x86_64-w64-mingw32/include",
 		}
 		linkoptions {
 			"-Qunused-arguments",
@@ -725,7 +742,7 @@ function toolchain(_buildDir, _libDir)
 --			"-Wuseless-cast",
 		}
 		buildoptions_cpp {
-			"-std=c++14",
+			"-std=c++11",
 		}
 		links {
 			"rt",
@@ -781,9 +798,6 @@ function toolchain(_buildDir, _libDir)
 			"-Wunused-value",
 			"-Wundef",
 		}
-		buildoptions_cpp {
-			"-std=c++14",
-		}
 		links {
 			"rt",
 			"dl",
@@ -801,7 +815,7 @@ function toolchain(_buildDir, _libDir)
 			"-Wundef",
 		}
 		buildoptions_cpp {
-			"-std=c++14",
+			"-std=c++11",
 		}
 		links {
 			"rt",
@@ -846,7 +860,7 @@ function toolchain(_buildDir, _libDir)
 			"-Wundef",
 		}
 		buildoptions_cpp {
-			"-std=c++14",
+			"-std=c++11",
 		}
 		linkoptions {
 			"-no-canonical-prefixes",
@@ -865,7 +879,6 @@ function toolchain(_buildDir, _libDir)
 			"__STEAMLINK__=1", -- There is no special prefedined compiler symbol to detect SteamLink, faking it.
 		}
 		buildoptions {
-			"-std=c++14",
 			"-Wfatal-errors",
 			"-Wunused-value",
 			"-Wundef",
@@ -910,6 +923,34 @@ function toolchain(_buildDir, _libDir)
 			"-Wl,--fix-cortex-a8",
 		}
 
+	configuration { "android-arm64" }
+		targetdir (path.join(_buildDir, "android-arm64/bin"))
+		objdir (path.join(_buildDir, "android-arm64/obj"))
+		libdirs {
+			"$(ANDROID_NDK_ROOT)/sources/cxx-stl/llvm-libc++/libs/arm64-v8a",
+		}
+		includedirs {
+			"$(ANDROID_NDK_ROOT)/sysroot/usr/include/aarch64-linux-android",
+		}
+		buildoptions {
+			"-gcc-toolchain $(ANDROID_NDK_ARM64)",
+			"--sysroot=" .. path.join("$(ANDROID_NDK_ROOT)/platforms", androidPlatform, "arch-arm64"),
+			"-target aarch64-none-linux-androideabi",
+			"-march=armv8-a",
+			"-Wunused-value",
+			"-Wundef",
+			"-m64",
+		}
+		linkoptions {
+			"-gcc-toolchain $(ANDROID_NDK_ARM64)",
+			"--sysroot=" .. path.join("$(ANDROID_NDK_ROOT)/platforms", androidPlatform, "arch-arm64"),
+			path.join("$(ANDROID_NDK_ROOT)/platforms", androidPlatform, "arch-arm64/usr/lib/crtbegin_so.o"),
+			path.join("$(ANDROID_NDK_ROOT)/platforms", androidPlatform, "arch-arm64/usr/lib/crtend_so.o"),
+			"-target aarch64-none-linux-androideabi",
+			"-march=armv8-a",
+			"-Wl,--fix-cortex-a8",
+		}
+
 	configuration { "android-x86" }
 		targetdir (path.join(_buildDir, "android-x86/bin"))
 		objdir (path.join(_buildDir, "android-x86/obj"))
@@ -944,14 +985,9 @@ function toolchain(_buildDir, _libDir)
 		objdir (path.join(_buildDir, "asmjs/obj"))
 		libdirs { path.join(_libDir, "lib/asmjs") }
 		buildoptions {
-			"-i\"system$(EMSCRIPTEN)/system/include\"",
-			"-i\"system$(EMSCRIPTEN)/system/include/libcxx\"",
-			"-i\"system$(EMSCRIPTEN)/system/include/libc\"",
+			"-isystem \"$(EMSDK)/fastcomp/emscripten\"",
 			"-Wunused-value",
 			"-Wundef",
-		}
-		buildoptions_cpp {
-			"-std=c++14",
 		}
 
 	configuration { "freebsd" }
@@ -1010,17 +1046,12 @@ function toolchain(_buildDir, _libDir)
 		objdir (path.join(_buildDir, "osx_universal/bin"))
 
 	configuration { "osx" }
-		buildoptions_cpp {
-			"-std=c++14",
-		}
-		buildoptions_objcpp {
-			"-std=c++14",
-		}
 		buildoptions {
 			"-Wfatal-errors",
 			"-msse2",
 			"-Wunused-value",
 			"-Wundef",
+			"-target x86_64-apple-macos" .. (#macosPlatform > 0 and macosPlatform or "10.11"),
 		}
 		includedirs { path.join(bxDir, "include/compat/osx") }
 
@@ -1029,10 +1060,10 @@ function toolchain(_buildDir, _libDir)
 			"-lc++",
 		}
 		buildoptions_cpp {
-			"-std=c++14",
+			"-std=c++11",
 		}
 		buildoptions_objcpp {
-			"-std=c++14",
+			"-std=c++11",
 		}
 		buildoptions {
 			"-Wfatal-errors",
@@ -1177,9 +1208,6 @@ function toolchain(_buildDir, _libDir)
 			"$(SCE_ORBIS_SDK_DIR)/target/include",
 			"$(SCE_ORBIS_SDK_DIR)/target/include_common",
 		}
-		buildoptions_cpp {
-			"-std=c++14",
-		}
 
 	configuration { "rpi" }
 		targetdir (path.join(_buildDir, "rpi/bin"))
@@ -1195,9 +1223,6 @@ function toolchain(_buildDir, _libDir)
 		buildoptions {
 			"-Wunused-value",
 			"-Wundef",
-		}
-		buildoptions_cpp {
-			"-std=c++14",
 		}
 		includedirs {
 			"/opt/vc/include",
@@ -1228,9 +1253,6 @@ function toolchain(_buildDir, _libDir)
 			"-Wundef",
 			"--sysroot=$(FREEDOM_E_SDK)/work/build/riscv-gnu-toolchain/riscv64-unknown-elf/prefix/riscv64-unknown-elf",
 		}
-		buildoptions_cpp {
-			"-std=c++14",
-		}
 
 	configuration {} -- reset configuration
 
@@ -1243,6 +1265,12 @@ function strip()
 		postbuildcommands {
 			"$(SILENT) echo Stripping symbols.",
 			"$(SILENT) $(ANDROID_NDK_ARM)/bin/arm-linux-androideabi-strip -s \"$(TARGET)\""
+		}
+
+	configuration { "android-arm64", "Release" }
+		postbuildcommands {
+			"$(SILENT) echo Stripping symbols.",
+			"$(SILENT) $(ANDROID_NDK_ARM64)/bin/aarch64-linux-android-strip -s \"$(TARGET)\""
 		}
 
 	configuration { "android-x86", "Release" }
@@ -1272,7 +1300,7 @@ function strip()
 	configuration { "asmjs" }
 		postbuildcommands {
 			"$(SILENT) echo Running asmjs finalize.",
-			"$(SILENT) \"$(EMSCRIPTEN)/emcc\" -O2 "
+			"$(SILENT) \"$(EMSDK)/fastcomp/bin/emcc\" -O2 "
 
 --				.. "-s ALLOW_MEMORY_GROWTH=1 "
 --				.. "-s ASSERTIONS=2 "
