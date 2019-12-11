@@ -788,6 +788,8 @@ namespace bgfx
 			UpdateViewName,
 			InvalidateOcclusionQuery,
 			SetName,
+			RequestScreenShot,
+			RequestPickColor,
 			End,
 			RendererShutdownEnd,
 			DestroyVertexDecl,
@@ -801,8 +803,6 @@ namespace bgfx
 			DestroyFrameBuffer,
 			DestroyUniform,
 			ReadTexture,
-			RequestScreenShot,
-			RequestPickColor,
 		};
 
 		void write(const void* _data, uint32_t _size)

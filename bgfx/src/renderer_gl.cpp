@@ -2972,19 +2972,19 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 			uint32_t width = m_resolution.width;
 			uint32_t height = m_resolution.height;
 
-			GLint oldFboId = 0;
+			GLint fboId = 0;
 			
 			if (isValid(_handle))
 			{
-				glGetIntegerv(GL_FRAMEBUFFER_BINDING, &oldFboId);
-
 				const FrameBufferGL& frameBuffer = m_frameBuffers[_handle.idx];
 				swapChain = frameBuffer.m_swapChain;
 				width = frameBuffer.m_width;
 				height = frameBuffer.m_height;
-				glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.m_fbo[0]);
+				fboId = frameBuffer.m_fbo[0];
 			}
-			//m_glctx.makeCurrent(swapChain);
+			m_glctx.makeCurrent(swapChain);
+			GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, fboId));
+
 			if (!BX_ENABLED(BX_PLATFORM_IOS) && !BX_ENABLED(BX_PLATFORM_ANDROID))
 			{
                 GL_CHECK(glReadBuffer(GL_COLOR_ATTACHMENT0) );
@@ -2992,7 +2992,7 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 			GL_CHECK(glPixelStorei(GL_PACK_ALIGNMENT, 1));
 			GL_CHECK(glReadPixels(
 				_x
-				, height - _y
+				, height - (_y + _h)
 				, _w
 				, _h
 				, m_readPixelsFmt
@@ -3000,7 +3000,6 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 				, _data
 			));
 
-			glBindFramebuffer(GL_FRAMEBUFFER, oldFboId);
 			
 			if (GL_RGBA == m_readPixelsFmt)
 			{
