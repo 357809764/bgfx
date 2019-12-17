@@ -388,7 +388,7 @@ namespace bgfx
 			hr = m_factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing) );
 			BX_TRACE("Allow tearing is %ssupported.", allowTearing ? "" : "not ");
 		}
-		
+
 		if (windowsVersionIs(Condition::GreaterEqual, 0x0602)) {
 			DXGI_SWAP_CHAIN_DESC1 sd1;
 			ZeroMemory(&sd1, sizeof(sd1));
@@ -406,14 +406,16 @@ namespace bgfx
 				| _scd.flags
 				| (allowTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0);
 
-			m_factory->CreateSwapChainForComposition(
+			HRESULT result = m_factory->CreateSwapChainForComposition(
 				_device,
 				&sd1,
 				nullptr,
 				reinterpret_cast<IDXGISwapChain1**>(_swapChain)
 				);
 
-		
+			if (!SUCCEEDED(result)) {
+				return result;
+			}
 
 			// dxgi
 			IDXGIDevice1* dxgiDevice1 = NULL;
