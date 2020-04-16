@@ -996,7 +996,7 @@ namespace bgfx { namespace d3d11
 					m_scd.alphaMode = DXGI_ALPHA_MODE_IGNORE;
 					m_scd.flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-					if (windowsVersionIs(Condition::GreaterEqual, 0x0602)) {
+					if (windowsVersionIs(Condition::GreaterEqual, 0x0604)) {
 						m_scd.flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 						m_scd.alphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
 					}
@@ -1016,7 +1016,7 @@ namespace bgfx { namespace d3d11
 							, &m_compTarget
 							);
 						if (SUCCEEDED(hr)) {
-							if (windowsVersionIs(Condition::GreaterEqual, 0x0602)) {
+							if (windowsVersionIs(Condition::GreaterEqual, 0x0604)) {
 								m_waitObject = m_swapChain->GetFrameLatencyWaitableObject();
 							}
 						}
