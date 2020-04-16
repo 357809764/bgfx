@@ -2397,6 +2397,36 @@ namespace bgfx
 			VER_GREATER_EQUAL,
 		};
 
+///////////////////new method////////////////////
+		OSVERSIONINFOEXW osvi = { sizeof(osvi), 0, 0, 0, 0, { 0 }, 0, 0 };
+		DWORDLONG        const dwlConditionMask = VerSetConditionMask(
+			VerSetConditionMask(
+			VerSetConditionMask(
+			0, VER_MAJORVERSION, s_condition[_op]),
+			VER_MINORVERSION, s_condition[_op]),
+			VER_SERVICEPACKMAJOR, s_condition[_op]);
+
+		osvi.dwMajorVersion = HIBYTE(_version);
+		osvi.dwMinorVersion = LOBYTE(_version);
+		osvi.wServicePackMajor = 0;
+
+		HMODULE hMod = GetModuleHandleA("ntdll");
+		if (hMod)
+		{
+			typedef LONG NTSTATUS, *PNTSTATUS;
+			typedef NTSTATUS(WINAPI* pFn_RtlVerifyVersionInfo)(
+				_In_ PRTL_OSVERSIONINFOEXW VersionInfo,
+				_In_ ULONG                 TypeMask,
+				_In_ ULONGLONG             ConditionMask
+				);
+			pFn_RtlVerifyVersionInfo pFnRtlVerifyVersionInfo = (pFn_RtlVerifyVersionInfo)GetProcAddress(hMod, "RtlVerifyVersionInfo");
+			if (pFnRtlVerifyVersionInfo != NULL)
+			{
+				return pFnRtlVerifyVersionInfo(&osvi, VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR, dwlConditionMask) == 0;
+			}
+		}
+		///////////////////new method end////////////////////
+
 		OSVERSIONINFOEXA ovi;
 		bx::memSet(&ovi, 0, sizeof(ovi) );
 		ovi.dwOSVersionInfoSize = sizeof(ovi);
@@ -2423,7 +2453,7 @@ namespace bgfx
 
 	RendererContextI* rendererCreate(const Init& _init)
 	{
-		int32_t scores[RendererType::Count];
+		int32_t scores[RendererType::Count] = { 0 };
 		uint32_t numScores = 0;
 
 		for (uint32_t ii = 0; ii < RendererType::Count; ++ii)
