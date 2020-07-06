@@ -418,39 +418,50 @@ namespace bgfx
 				| _scd.flags
 				| (allowTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0);
 
-		
-			hr = m_factory->CreateSwapChainForComposition(
+
+			
+			if (_scd.transparent) {
+				hr = m_factory->CreateSwapChainForComposition(
 				_device,
 				&sd1,
 				nullptr,
 				reinterpret_cast<IDXGISwapChain1**>(_swapChain)
 				);
 
-		
-
-			// dxgi
-			IDXGIDevice1* dxgiDevice1 = NULL;
-			_device->QueryInterface(IID_IDXGIDevice1, (void**)&dxgiDevice1);
-			if (dxgiDevice1 != NULL) {
-				if (pDCompositionCreateDevice == NULL) {
-					return S_FALSE;
-				}
-				if (m_dcompDevice == NULL) {
-					pDCompositionCreateDevice(dxgiDevice1, __uuidof(m_dcompDevice), reinterpret_cast<void**>(&m_dcompDevice));
-				}
+				// dxgi
+				IDXGIDevice1* dxgiDevice1 = NULL;
+				_device->QueryInterface(IID_IDXGIDevice1, (void**)&dxgiDevice1);
+				if (dxgiDevice1 != NULL) {
+					if (pDCompositionCreateDevice == NULL) {
+						return S_FALSE;
+					}
+					if (m_dcompDevice == NULL) {
+						pDCompositionCreateDevice(dxgiDevice1, __uuidof(m_dcompDevice), reinterpret_cast<void**>(&m_dcompDevice));
+					}
 				
-				HRESULT result = m_dcompDevice->CreateTargetForHwnd((HWND)_scd.nwh, true, _compTarget);
-				if (result == S_OK) {
-					IDCompositionVisual* visual;
-					m_dcompDevice->CreateVisual(&visual);
+					HRESULT result = m_dcompDevice->CreateTargetForHwnd((HWND)_scd.nwh, true, _compTarget);
+					if (result == S_OK) {
+						IDCompositionVisual* visual;
+						m_dcompDevice->CreateVisual(&visual);
 
-					visual->SetContent(*_swapChain);
-					(*_compTarget)->SetRoot(visual);
-					m_dcompDevice->Commit();
-					DX_RELEASE_I(visual);
+						visual->SetContent(*_swapChain);
+						(*_compTarget)->SetRoot(visual);
+						m_dcompDevice->Commit();
+						DX_RELEASE_I(visual);
+					}
+
+					DX_RELEASE_I(dxgiDevice1);
 				}
-
-				DX_RELEASE_I(dxgiDevice1);
+			}
+			else {
+				hr = m_factory->CreateSwapChainForHwnd(
+					_device,
+					(HWND)_scd.nwh,
+					&sd1,
+					nullptr,
+					nullptr,
+					reinterpret_cast<IDXGISwapChain1**>(_swapChain)
+				);
 			}
 		}
 		else {

@@ -988,17 +988,30 @@ namespace bgfx { namespace d3d11
 
 					m_scd.bufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 					m_scd.bufferCount = m_swapBufferCount;
-					m_scd.scaling = 0 == g_platformData.nwh
-						? DXGI_SCALING_NONE
-						: DXGI_SCALING_STRETCH
-						;
+					
 					m_scd.swapEffect = m_swapEffect;
-					m_scd.alphaMode = DXGI_ALPHA_MODE_IGNORE;
+					
 					m_scd.flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+					m_scd.transparent = _init.resolution.transparent;
 
 					if (windowsVersionIs(Condition::GreaterEqual, 0x0604)) {
 						m_scd.flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
-						m_scd.alphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
+						
+						if (_init.resolution.transparent) {
+							m_scd.alphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
+							m_scd.scaling = DXGI_SCALING_STRETCH;
+						}
+						else {
+							m_scd.alphaMode = DXGI_ALPHA_MODE_IGNORE;
+							m_scd.scaling = DXGI_SCALING_NONE;
+						}
+					}
+					else {
+						m_scd.alphaMode = DXGI_ALPHA_MODE_IGNORE;
+						m_scd.scaling = 0 == g_platformData.nwh
+							? DXGI_SCALING_NONE
+							: DXGI_SCALING_STRETCH
+							;
 					}
 
 					m_scd.maxFrameLatency = bx::min<uint8_t>(_init.resolution.maxFrameLatency, 3);

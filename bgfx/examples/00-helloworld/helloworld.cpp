@@ -38,6 +38,7 @@ public:
 		init.resolution.reset  = m_reset;
 		init.resolution.maxFrameLatency = 1;
 		init.resolution.numBackBuffers = 2;
+		init.resolution.transparent = true;
 		bgfx::init(init);
 
 		// Enable debug text.
