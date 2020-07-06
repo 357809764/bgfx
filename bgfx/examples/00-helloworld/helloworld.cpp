@@ -54,6 +54,7 @@ public:
 		imguiCreate();
 
 		bgfx::waitRenderFrame(1000);
+		bgfx::waitRenderFrame(1000);
 	}
 
 	virtual int shutdown() override

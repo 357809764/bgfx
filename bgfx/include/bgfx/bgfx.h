@@ -727,6 +727,7 @@ namespace bgfx
 		bool     originBottomLeft; //!< True when NDC origin is at bottom left.
 		uint8_t  numGPUs;          //!< Number of enumerated GPUs.
 
+		uint32_t		rate;  // screen rate
 		/// GPU info.
 		///
 		/// @attention C99 equivalent is `bgfx_caps_gpu_t`.

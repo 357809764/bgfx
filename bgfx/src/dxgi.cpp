@@ -271,6 +271,18 @@ namespace bgfx
 							);
 						BX_TRACE("\t\t    AttachedToDesktop: %d", outputDesc.AttachedToDesktop);
 						BX_TRACE("\t\t             Rotation: %d", outputDesc.Rotation);
+						MONITORINFOEX monitorInfo;
+						monitorInfo.cbSize = sizeof(MONITORINFOEX);
+
+
+						GetMonitorInfo(outputDesc.Monitor, &monitorInfo);
+
+						DEVMODE devMode;
+						devMode.dmSize = sizeof(DEVMODE);
+						devMode.dmDriverExtra = 0;
+						EnumDisplaySettings(monitorInfo.szDevice, ENUM_CURRENT_SETTINGS, &devMode);
+						_caps.rate = devMode.dmDisplayFrequency;
+
 
 #if BX_PLATFORM_WINDOWS
 						IDXGIOutput6* output6;
@@ -296,7 +308,6 @@ namespace bgfx
 
 								hdr10 |= DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020 == desc.ColorSpace;
 							}
-
 							// BK - warn only because RenderDoc might be present.
 							DX_RELEASE_W(output6, 1);
 						}
@@ -385,7 +396,7 @@ namespace bgfx
 		{
 			// BK - CheckFeatureSupport with DXGI_FEATURE_PRESENT_ALLOW_TEARING
 			//      will crash on pre Windows 8. Issue #1356.
-			m_factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing) );
+			//m_factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing) );
 			BX_TRACE("Allow tearing is %ssupported.", allowTearing ? "" : "not ");
 		}
 		
@@ -407,7 +418,8 @@ namespace bgfx
 				| _scd.flags
 				| (allowTearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0);
 
-			m_factory->CreateSwapChainForComposition(
+		
+			hr = m_factory->CreateSwapChainForComposition(
 				_device,
 				&sd1,
 				nullptr,
