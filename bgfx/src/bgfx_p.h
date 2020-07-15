@@ -788,9 +788,9 @@ namespace bgfx
 			UpdateViewName,
 			InvalidateOcclusionQuery,
 			SetName,
+			End,
 			RequestScreenShot,
 			RequestPickColor,
-			End,
 			RendererShutdownEnd,
 			DestroyVertexDecl,
 			DestroyIndexBuffer,
@@ -4451,7 +4451,7 @@ namespace bgfx
 
 			BGFX_CHECK_HANDLE_INVALID_OK("requestScreenShot", m_frameBufferHandle, _handle);
 
-			if (isValid(_handle) )
+			/*if (isValid(_handle) )
 			{
 				FrameBufferRef& ref = m_frameBufferRef[_handle.idx];
 				if (!ref.m_window)
@@ -4459,7 +4459,7 @@ namespace bgfx
 					BX_TRACE("requestScreenShot can be done only for window frame buffer handles (handle: %d).", _handle.idx);
 					return;
 				}
-			}
+			}*/
 
 			CommandBuffer& cmdbuf = getCommandBuffer(CommandBuffer::RequestScreenShot);
 			uint16_t len = (uint16_t)bx::strLen(_filePath)+1;

@@ -1923,22 +1923,42 @@ namespace bgfx { namespace d3d11
 
 		void requestScreenShot(FrameBufferHandle _handle, const char* _filePath) override
 		{
-			IDXGISwapChain* swapChain = isValid(_handle)
-				? m_frameBuffers[_handle.idx].m_swapChain
-				: m_swapChain
-				;
+			
+			ID3D11Texture2D* targetBuffer = NULL;
 
-			if (NULL == swapChain)
-			{
-				BX_TRACE("Unable to capture screenshot %s.", _filePath);
-				return;
+			if (isValid(_handle) && m_frameBuffers[_handle.idx].m_swapChain == NULL) {
+				const FrameBufferD3D11& frameBuffer = m_frameBuffers[_handle.idx];
+				for (uint32_t ii = 0; ii < frameBuffer.m_numTh; ii++) {
+					const Attachment& at = frameBuffer.m_attachment[ii];
+
+					if (isValid(at.handle) && at.access == Access::Write)
+					{
+						const TextureD3D11& texture = m_textures[at.handle.idx];
+						targetBuffer = texture.m_texture2d;
+						break;
+					}
+				}
+				if (targetBuffer != NULL) {
+					targetBuffer->AddRef();
+				}
+			}
+			else {
+				IDXGISwapChain* swapChain = isValid(_handle)
+					? m_frameBuffers[_handle.idx].m_swapChain
+					: m_swapChain
+					;
+
+				if (NULL == swapChain)
+				{
+					BX_TRACE("Unable to capture screenshot %s.", _filePath);
+					return;
+				}
+
+				DX_CHECK(swapChain->GetBuffer(0, IID_ID3D11Texture2D, (void**)&targetBuffer));
 			}
 
-			ID3D11Texture2D* backBuffer;
-			DX_CHECK(swapChain->GetBuffer(0, IID_ID3D11Texture2D, (void**)&backBuffer) );
-
 			D3D11_TEXTURE2D_DESC backBufferDesc;
-			backBuffer->GetDesc(&backBufferDesc);
+			targetBuffer->GetDesc(&backBufferDesc);
 
 			D3D11_TEXTURE2D_DESC desc;
 			bx::memCopy(&desc, &backBufferDesc, sizeof(desc) );
@@ -1954,7 +1974,7 @@ namespace bgfx { namespace d3d11
 			{
 				if (backBufferDesc.SampleDesc.Count == 1)
 				{
-					m_deviceCtx->CopyResource(texture, backBuffer);
+					m_deviceCtx->CopyResource(texture, targetBuffer);
 				}
 				else
 				{
@@ -1964,7 +1984,7 @@ namespace bgfx { namespace d3d11
 					hr = m_device->CreateTexture2D(&desc, NULL, &resolve);
 					if (SUCCEEDED(hr) )
 					{
-						m_deviceCtx->ResolveSubresource(resolve, 0, backBuffer, 0, desc.Format);
+						m_deviceCtx->ResolveSubresource(resolve, 0, targetBuffer, 0, desc.Format);
 						m_deviceCtx->CopyResource(texture, resolve);
 						DX_RELEASE(resolve, 0);
 					}
@@ -1993,27 +2013,46 @@ namespace bgfx { namespace d3d11
 				DX_RELEASE(texture, 0);
 			}
 
-			DX_RELEASE(backBuffer, 0);
+			targetBuffer->Release();
 		}
 
 		void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data) override
 		{
-			IDXGISwapChain* swapChain = isValid(_handle)
-				? m_frameBuffers[_handle.idx].m_swapChain
-				: m_swapChain
-				;
+			ID3D11Texture2D* targetBuffer = NULL;
 
-			if (NULL == swapChain)
-			{
-				BX_TRACE("Unable to request pick color at handle:%d.", _handle.idx);
-				return;
+			if (isValid(_handle) && m_frameBuffers[_handle.idx].m_swapChain == NULL) {
+				const FrameBufferD3D11& frameBuffer = m_frameBuffers[_handle.idx];
+				for (uint32_t ii = 0; ii < frameBuffer.m_numTh; ii++) {
+					const Attachment& at = frameBuffer.m_attachment[ii];
+
+					if (isValid(at.handle) && at.access == Access::Write)
+					{
+						const TextureD3D11& texture = m_textures[at.handle.idx];
+						targetBuffer = texture.m_texture2d;
+						break;
+					}
+				}
+				if (targetBuffer != NULL) {
+					targetBuffer->AddRef();
+				}
+			}
+			else {
+				IDXGISwapChain* swapChain = isValid(_handle)
+					? m_frameBuffers[_handle.idx].m_swapChain
+					: m_swapChain
+					;
+
+				if (NULL == swapChain)
+				{
+					BX_TRACE("Unable to request pick color at handle:%d.", _handle.idx);
+					return;
+				}
+
+				DX_CHECK(swapChain->GetBuffer(0, IID_ID3D11Texture2D, (void**)&targetBuffer));
 			}
 
-			ID3D11Texture2D* backBuffer;
-			DX_CHECK(swapChain->GetBuffer(0, IID_ID3D11Texture2D, (void**)&backBuffer));
-
 			D3D11_TEXTURE2D_DESC backBufferDesc;
-			backBuffer->GetDesc(&backBufferDesc);
+			targetBuffer->GetDesc(&backBufferDesc);
 
 			D3D11_TEXTURE2D_DESC desc;
 			bx::memCopy(&desc, &backBufferDesc, sizeof(desc));
@@ -2036,7 +2075,7 @@ namespace bgfx { namespace d3d11
 				sourceRegion.bottom = _y + _h;
 				sourceRegion.front = 0;
 				sourceRegion.back = 1;
-				m_deviceCtx->CopySubresourceRegion(texture, 0, 0, 0, 0, backBuffer, 0, &sourceRegion);
+				m_deviceCtx->CopySubresourceRegion(texture, 0, 0, 0, 0, targetBuffer, 0, &sourceRegion);
 
 
 				D3D11_MAPPED_SUBRESOURCE mapped;
@@ -2069,7 +2108,7 @@ namespace bgfx { namespace d3d11
 				DX_RELEASE(texture, 0);
 			}
 
-			DX_RELEASE(backBuffer, 0);
+			targetBuffer->Release();
 		}
 
 		void updateViewName(ViewId _id, const char* _name) override
