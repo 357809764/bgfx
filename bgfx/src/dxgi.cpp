@@ -427,7 +427,10 @@ namespace bgfx
 				nullptr,
 				reinterpret_cast<IDXGISwapChain1**>(_swapChain)
 				);
-
+				if (hr != S_OK) {
+					BX_TRACE("Failed to create swap chain.");
+					return S_FALSE;
+				}
 				// dxgi
 				IDXGIDevice1* dxgiDevice1 = NULL;
 				_device->QueryInterface(IID_IDXGIDevice1, (void**)&dxgiDevice1);
