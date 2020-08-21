@@ -788,9 +788,10 @@ namespace bgfx
 			UpdateViewName,
 			InvalidateOcclusionQuery,
 			SetName,
+			
+			RequestPickColor,
 			End,
 			RequestScreenShot,
-			RequestPickColor,
 			RendererShutdownEnd,
 			DestroyVertexDecl,
 			DestroyIndexBuffer,

@@ -514,14 +514,14 @@ namespace bimg
 	{
 		BX_ERROR_SCOPE(_err);
 
-		ImageContainer* input = imageParseDds     (_allocator, _data, _size, _err)        ;
+		ImageContainer* input = imageParseStbImage     (_allocator, _data, _size, _err)        ;
 		input = NULL == input ? imageParseKtx     (_allocator, _data, _size, _err) : input;
 		input = NULL == input ? imageParsePvr3    (_allocator, _data, _size, _err) : input;
 		input = NULL == input ? imageParseGnf     (_allocator, _data, _size, _err) : input;
 		input = NULL == input ? imageParseLodePng (_allocator, _data, _size, _err) : input;
 		input = NULL == input ? imageParseTinyExr (_allocator, _data, _size, _err) : input;
 		input = NULL == input ? imageParseJpeg    (_allocator, _data, _size, _err) : input;
-		input = NULL == input ? imageParseStbImage(_allocator, _data, _size, _err) : input;
+		input = NULL == input ? imageParseDds(_allocator, _data, _size, _err) : input;
 
 		if (NULL == input)
 		{
