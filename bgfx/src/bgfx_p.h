@@ -2687,7 +2687,7 @@ namespace bgfx
 		virtual void destroyFrameBuffer(FrameBufferHandle _handle) = 0;
 		virtual void createUniform(UniformHandle _handle, UniformType::Enum _type, uint16_t _num, const char* _name) = 0;
 		virtual void destroyUniform(UniformHandle _handle) = 0;
-		virtual void requestScreenShot(FrameBufferHandle _handle, const char* _filePath) = 0;
+		virtual void requestScreenShot(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data) = 0;
 		virtual void requestPickColor(FrameBufferHandle _handle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, void* _data) = 0;
 		virtual void updateViewName(ViewId _id, const char* _name) = 0;
 		virtual void updateUniform(uint16_t _loc, const void* _data, uint32_t _size) = 0;
@@ -4446,27 +4446,27 @@ namespace bgfx
 			m_freeOcclusionQueryHandle[m_numFreeOcclusionQueryHandles++] = _handle;
 		}
 
-		BGFX_API_FUNC(void requestScreenShot(FrameBufferHandle _handle, const char* _filePath) )
+		BGFX_API_FUNC(uint32_t requestScreenShot(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data))
 		{
 			BGFX_MUTEX_SCOPE(m_resourceApiLock);
 
 			BGFX_CHECK_HANDLE_INVALID_OK("requestScreenShot", m_frameBufferHandle, _handle);
 
-			/*if (isValid(_handle) )
-			{
-				FrameBufferRef& ref = m_frameBufferRef[_handle.idx];
-				if (!ref.m_window)
-				{
-					BX_TRACE("requestScreenShot can be done only for window frame buffer handles (handle: %d).", _handle.idx);
-					return;
-				}
-			}*/
+			if (_x < 0 || _y < 0 || _w <= 0 || _h <= 0) {
+				BX_TRACE("requestPickColor param error(%d,%d,%d,%d)", _x, _y, _w, _h);
+				return 0;
+			}
 
 			CommandBuffer& cmdbuf = getCommandBuffer(CommandBuffer::RequestScreenShot);
-			uint16_t len = (uint16_t)bx::strLen(_filePath)+1;
+
 			cmdbuf.write(_handle);
-			cmdbuf.write(len);
-			cmdbuf.write(_filePath, len);
+			cmdbuf.write(_x);
+			cmdbuf.write(_y);
+			cmdbuf.write(_w);
+			cmdbuf.write(_h);
+			cmdbuf.write(_data);
+
+			return m_frames + 2;
 		}
 
 		BGFX_API_FUNC(uint32_t requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data))
@@ -4487,7 +4487,7 @@ namespace bgfx
 
 			if (_x < 0 || _y < 0 || _w <= 0 || _h <= 0) {
 				BX_TRACE("requestPickColor param error(%d,%d,%d,%d)", _x, _y, _w, _h);
-				return false;
+				return 0;
 			}
 
 			CommandBuffer& cmdbuf = getCommandBuffer(CommandBuffer::RequestPickColor);

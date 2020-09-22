@@ -3996,9 +3996,13 @@ namespace bgfx
 	/// @attention Frame buffer handle must be created with OS' target native window handle.
 	/// @attention C99 equivalent is `bgfx_request_screen_shot`.
 	///
-	void requestScreenShot(
-		  FrameBufferHandle _handle
-		, const char* _filePath
+	uint32_t requestScreenShot(
+		FrameBufferHandle _handle
+		, uint32_t _x
+		, uint32_t _y
+		, uint32_t _w
+		, uint32_t _h
+		, void* _data
 		);
 
 	uint32_t requestPickColor(

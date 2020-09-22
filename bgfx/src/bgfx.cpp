@@ -3038,18 +3038,23 @@ namespace bgfx
 				break;
 
 			case CommandBuffer::RequestScreenShot:
+			{
 				{
 					FrameBufferHandle handle;
+					uint32_t _x, _y, _w, _h;
+					void* _data;
+
 					_cmdbuf.read(handle);
+					_cmdbuf.read(_x);
+					_cmdbuf.read(_y);
+					_cmdbuf.read(_w);
+					_cmdbuf.read(_h);
+					_cmdbuf.read(_data);
 
-					uint16_t len;
-					_cmdbuf.read(len);
-
-					const char* filePath = (const char*)_cmdbuf.skip(len);
-
-					m_renderCtx->requestScreenShot(handle, filePath);
+					m_renderCtx->requestScreenShot(handle, _x, _y, _w, _h, _data);
 				}
 				break;
+			}
 			case CommandBuffer::RequestPickColor:
 				{
 					FrameBufferHandle handle;
@@ -4837,10 +4842,10 @@ namespace bgfx
 		s_ctx->m_encoder0->blit(_id, _dst, _dstMip, _dstX, _dstY, _dstZ, _src, _srcMip, _srcX, _srcY, _srcZ, _width, _height, _depth);
 	}
 
-	void requestScreenShot(FrameBufferHandle _handle, const char* _filePath)
+	uint32_t requestScreenShot(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data)
 	{
 		BGFX_CHECK_API_THREAD();
-		s_ctx->requestScreenShot(_handle, _filePath);
+		return s_ctx->requestScreenShot(_handle, _x, _y, _w, _h, _data);
 	}
 
 	uint32_t requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data) {
@@ -6233,13 +6238,13 @@ BGFX_C_API void bgfx_encoder_blit(bgfx_encoder_s* _encoder, bgfx_view_id_t _id, 
 
 #undef BGFX_ENCODER
 
-BGFX_C_API void bgfx_request_screen_shot(bgfx_frame_buffer_handle_t _handle, const char* _filePath)
+BGFX_C_API uint32_t bgfx_request_screen_shot(bgfx_frame_buffer_handle_t _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data)
 {
 	union { bgfx_frame_buffer_handle_t c; bgfx::FrameBufferHandle cpp; } handle = { _handle };
-	bgfx::requestScreenShot(handle.cpp, _filePath);
+	return bgfx::requestScreenShot(handle.cpp, _x, _y, _w, _h, _data);
 }
 
-BGFX_C_API bool bgfx_request_pick_color(bgfx_frame_buffer_handle_t _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data)
+BGFX_C_API uint32_t bgfx_request_pick_color(bgfx_frame_buffer_handle_t _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data)
 {
 	union { bgfx_frame_buffer_handle_t c; bgfx::FrameBufferHandle cpp; } handle = { _handle };
 	return bgfx::requestPickColor(handle.cpp, _x, _y, _w, _h, _data);

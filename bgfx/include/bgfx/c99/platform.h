@@ -191,7 +191,7 @@ typedef struct bgfx_interface_vtbl
     void (*encoder_dispatch_indirect)(struct bgfx_encoder_s* _encoder, bgfx_view_id_t _id, bgfx_program_handle_t _handle, bgfx_indirect_buffer_handle_t _indirectHandle, uint16_t _start, uint16_t _num);
     void (*encoder_discard)(struct bgfx_encoder_s* _encoder);
     void (*encoder_blit)(struct bgfx_encoder_s* _encoder, bgfx_view_id_t _id, bgfx_texture_handle_t _dst, uint8_t _dstMip, uint16_t _dstX, uint16_t _dstY, uint16_t _dstZ, bgfx_texture_handle_t _src, uint8_t _srcMip, uint16_t _srcX, uint16_t _srcY, uint16_t _srcZ, uint16_t _width, uint16_t _height, uint16_t _depth);
-    void (*request_screen_shot)(bgfx_frame_buffer_handle_t _handle, const char* _filePath);
+    uint32_t (*request_screen_shot)(bgfx_frame_buffer_handle_t _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data);
 
 } bgfx_interface_vtbl_t;
 

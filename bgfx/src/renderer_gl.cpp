@@ -2923,57 +2923,9 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 			m_uniformReg.remove(_handle);
 		}
 
-		void requestScreenShot(FrameBufferHandle _handle, const char* _filePath) override
+		void requestScreenShot(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data) override
 		{
-			SwapChainGL* swapChain = NULL;
-			uint32_t width  = m_resolution.width;
-			uint32_t height = m_resolution.height;
-
-			GLint oldFboId = 0;
-			
-			if (isValid(_handle))
-			{
-				glGetIntegerv(GL_FRAMEBUFFER_BINDING, &oldFboId);
-
-				const FrameBufferGL& frameBuffer = m_frameBuffers[_handle.idx];
-				swapChain = frameBuffer.m_swapChain;
-				width = frameBuffer.m_width;
-				height = frameBuffer.m_height;
-				glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.m_fbo[0]);
-			}
-
-			m_glctx.makeCurrent(swapChain);
-
-			uint32_t length = width*height*4;
-			uint8_t* data = (uint8_t*)BX_ALLOC(g_allocator, length);
-			
-			GL_CHECK(glPixelStorei(GL_PACK_ALIGNMENT, 4));
-			
-			GL_CHECK(glReadPixels(0
-				, 0
-				, width
-				, height
-				, m_readPixelsFmt
-				, GL_UNSIGNED_BYTE
-				, data
-				) );
-
-			glBindFramebuffer(GL_FRAMEBUFFER, oldFboId);
-
-			if (GL_RGBA == m_readPixelsFmt)
-			{
-				bimg::imageSwizzleBgra8(data, width*4, width, height, data, width*4);
-			}
-
-			g_callback->screenShot(_filePath
-				, width
-				, height
-				, width*4
-				, data
-				, length
-				, true
-				);
-			BX_FREE(g_allocator, data);
+			requestPickColor(_handle, _x, _y, _w, _h, _data);
 		}
 
 		void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data) override

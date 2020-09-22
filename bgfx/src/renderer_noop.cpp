@@ -218,7 +218,7 @@ namespace bgfx { namespace noop
 		{
 		}
 
-		void requestScreenShot(FrameBufferHandle /*_handle*/, const char* /*_filePath*/) override
+		void requestScreenShot(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data) override
 		{
 		}
 

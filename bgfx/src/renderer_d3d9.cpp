@@ -1196,71 +1196,9 @@ namespace bgfx { namespace d3d9
 			m_uniformReg.remove(_handle);
 		}
 
-		void requestScreenShot(FrameBufferHandle _handle, const char* _filePath) override
+		void requestScreenShot(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data) override
 		{
-			IDirect3DSwapChain9* swapChain = isValid(_handle)
-				? m_frameBuffers[_handle.idx].m_swapChain
-				: m_swapChain
-				;
-
-			if (NULL == swapChain)
-			{
-				BX_TRACE("Unable to capture screenshot %s.", _filePath);
-				return;
-			}
-
-			D3DPRESENT_PARAMETERS params;
-			DX_CHECK(swapChain->GetPresentParameters(&params));
-
-			IDirect3DSurface9* surface;
-			D3DDEVICE_CREATION_PARAMETERS dcp;
-			DX_CHECK(m_device->GetCreationParameters(&dcp) );
-
-			D3DDISPLAYMODE dm;
-			DX_CHECK(m_d3d9->GetAdapterDisplayMode(dcp.AdapterOrdinal, &dm) );
-
-			DX_CHECK(m_device->CreateOffscreenPlainSurface(dm.Width
-				, dm.Height
-				, D3DFMT_A8R8G8B8
-				, D3DPOOL_SCRATCH
-				, &surface
-				, NULL
-				) );
-
-			HWND nwh = params.hDeviceWindow;
-
-			SetWindowPos(nwh, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
-
-			DX_CHECK(m_device->GetFrontBufferData(0, surface) );
-
-			SetWindowPos(nwh, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
-
-			D3DLOCKED_RECT rect;
-			DX_CHECK(surface->LockRect(&rect
-				, NULL
-				, D3DLOCK_NO_DIRTY_UPDATE|D3DLOCK_NOSYSLOCK|D3DLOCK_READONLY
-				) );
-
-			RECT rc;
-			GetClientRect(nwh, &rc);
-			POINT point;
-			point.x = rc.left;
-			point.y = rc.top;
-			ClientToScreen(nwh, &point);
-			uint8_t* data = (uint8_t*)rect.pBits;
-			uint32_t bytesPerPixel = rect.Pitch/dm.Width;
-
-			g_callback->screenShot(_filePath
-				, params.BackBufferWidth
-				, params.BackBufferHeight
-				, rect.Pitch
-				, &data[point.y*rect.Pitch+point.x*bytesPerPixel]
-				, params.BackBufferHeight*rect.Pitch
-				, false
-				);
-
-			DX_CHECK(surface->UnlockRect() );
-			DX_RELEASE(surface, 0);
+			requestPickColor(_handle, _x, _y, _w, _h, _data);
 		}
 
 		void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void *_data) override
