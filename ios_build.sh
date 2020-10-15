@@ -1,26 +1,44 @@
 #!/bin/sh
 
-ARM64_DIR="bgfx/.build/ios-arm64/bin/"
-ARM_DIR="bgfx/.build/ios-arm/bin/"
-SIM_DIR="bgfx/.build/ios-simulator/bin/"
+SRC_DIR=(
+"bgfx/.build/ios-arm64/bin/"
+"bgfx/.build/ios-arm/bin/"
+"bgfx/.build/ios-simulator/bin/"
+"bgfx/.build/ios-simulator64/bin/"
+)
+
+LIB_NAME1=(
+"libbgfxRelease.a"
+"libbxRelease.a"
+"libbimgRelease.a"
+"libbimg_decodeRelease.a"
+)
+
+LIB_NAME2=(
+"libbgfxDebug.a"
+"libbxDebug.a"
+"libbimgDebug.a"
+"libbimg_decodeDebug.a"
+)
 
 OUT_DIR="ios_out"
 
 cd bgfx
-make ios-arm && make ios-arm64 && make ios-simulator
+make ios-arm && make ios-arm64 && make ios-simulator && make ios-simulator64
 
 cd ..
 mkdir -p ${OUT_DIR}
 
-lipo -create ${ARM64_DIR}libbgfxRelease.a ${ARM_DIR}libbgfxRelease.a ${SIM_DIR}libbgfxRelease.a -output ${OUT_DIR}/libbgfxRelease.a
-lipo -create ${ARM64_DIR}libbxRelease.a ${ARM_DIR}libbxRelease.a ${SIM_DIR}libbxRelease.a -output ${OUT_DIR}/libbxRelease.a
-lipo -create ${ARM64_DIR}libbimgRelease.a ${ARM_DIR}libbimgRelease.a ${SIM_DIR}libbimgRelease.a -output ${OUT_DIR}/libbimgRelease.a
-lipo -create ${ARM64_DIR}libbimg_decodeRelease.a ${ARM_DIR}libbimg_decodeRelease.a ${SIM_DIR}libbimg_decodeRelease.a -output ${OUT_DIR}/libbimg_decodeRelease.a
-
-lipo -create ${ARM64_DIR}libbgfxDebug.a ${ARM_DIR}libbgfxDebug.a ${SIM_DIR}libbgfxDebug.a -output ${OUT_DIR}/libbgfxDebug.a
-lipo -create ${ARM64_DIR}libbxDebug.a ${ARM_DIR}libbxDebug.a ${SIM_DIR}libbxDebug.a -output ${OUT_DIR}/libbxDebug.a
-lipo -create ${ARM64_DIR}libbimgDebug.a ${ARM_DIR}libbimgDebug.a ${SIM_DIR}libbimgDebug.a -output ${OUT_DIR}/libbimgDebug.a
-lipo -create ${ARM64_DIR}libbimg_decodeDebug.a ${ARM_DIR}libbimg_decodeDebug.a ${SIM_DIR}libbimg_decodeDebug.a -output ${OUT_DIR}/libbimg_decodeDebug.a
+echo "-----------------   lipo -create start -------------------"
+for(( i=0;i<4;i++)) do
+    lipo -create ${SRC_DIR[0]}${LIB_NAME1[i]} ${SRC_DIR[1]}${LIB_NAME1[i]} ${SRC_DIR[2]}${LIB_NAME1[i]} ${SRC_DIR[3]}${LIB_NAME1[i]} -output ${OUT_DIR}/${LIB_NAME1[i]}
+    lipo -info ${OUT_DIR}/${LIB_NAME1[i]}
+    
+    lipo -create ${SRC_DIR[0]}${LIB_NAME2[i]} ${SRC_DIR[1]}${LIB_NAME2[i]} ${SRC_DIR[2]}${LIB_NAME2[i]} ${SRC_DIR[3]}${LIB_NAME2[i]} -output ${OUT_DIR}/${LIB_NAME2[i]}
+    lipo -info ${OUT_DIR}/${LIB_NAME2[i]}
+done;
+#lipo -create ${ARM64_DIR}libbgfxRelease.a ${ARM_DIR}libbgfxRelease.a ${SIM_DIR}libbgfxRelease.a ${SIM64_DIR}libbgfxRelease.a -output ${OUT_DIR}/libbgfxRelease.a
+echo "-----------------   lipo -create end   -------------------"
 
 #open ${OUT_DIR} &
 
