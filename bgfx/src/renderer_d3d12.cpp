@@ -1468,7 +1468,7 @@ namespace bgfx { namespace d3d12
 			return m_lost;
 		}
 
-		void flip() override
+		void flip(Rect _dirty) override
 		{
 			if (!m_lost)
 			{

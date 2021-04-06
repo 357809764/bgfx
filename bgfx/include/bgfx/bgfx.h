@@ -1957,7 +1957,7 @@ namespace bgfx
 	///
 	/// @attention C99 equivalent is `bgfx_frame`.
 	///
-	uint32_t frame(bool _capture = false);
+	uint32_t frame(uint16_t _x, uint16_t _y, uint16_t _width, uint16_t _height, bool _capture = false);
 
 	/// Returns current renderer backend API type.
 	///

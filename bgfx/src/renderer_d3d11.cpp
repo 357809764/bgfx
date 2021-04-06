@@ -970,7 +970,7 @@ namespace bgfx { namespace d3d11
 
 					m_swapEffect =
 #if BX_PLATFORM_WINDOWS
-						DXGI_SWAP_EFFECT_FLIP_DISCARD
+						DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
 #else
 						DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
 #endif // !BX_PLATFORM_WINDOWS
@@ -1037,7 +1037,7 @@ namespace bgfx { namespace d3d11
 						{
 							// DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL is not available on win7
 							// Try again with DXGI_SWAP_EFFECT_DISCARD
-							m_swapEffect      = DXGI_SWAP_EFFECT_DISCARD;
+							m_swapEffect      = DXGI_SWAP_EFFECT_SEQUENTIAL;
 							m_swapBufferCount = 1;
 							m_scd.bufferCount = m_swapBufferCount;
 							m_scd.swapEffect  = m_swapEffect;
@@ -2250,7 +2250,7 @@ namespace bgfx { namespace d3d11
 			return m_lost;
 		}
 
-		void flip() override
+		void flip(Rect _dirty) override
 		{
 			if (!m_lost)
 			{
@@ -2270,7 +2270,23 @@ namespace bgfx { namespace d3d11
 					if (NULL != m_swapChain
 					&&  m_needPresent)
 					{
-						hr = m_swapChain->Present(syncInterval, 0);
+						if (m_firstPresent || _dirty.isZero()) {
+							hr = m_swapChain->Present(syncInterval, 0);
+							m_firstPresent = false;
+						}
+						else {
+							//hr = m_swapChain->Present(syncInterval, 0);
+							DXGI_PRESENT_PARAMETERS param = { 0 };
+							RECT dirty;
+							dirty.left = _dirty.m_x;
+							dirty.top = _dirty.m_y;
+							dirty.right = _dirty.m_x + _dirty.m_width;
+							dirty.bottom = _dirty.m_y + _dirty.m_height;
+ 							param.DirtyRectsCount = 1;
+							param.pDirtyRects = &dirty;
+							hr = m_swapChain->Present1(syncInterval, 0, &param);
+						}
+						
 
 						m_needPresent = false;
 					}
@@ -3483,6 +3499,7 @@ namespace bgfx { namespace d3d11
 		ID3D11Texture2D*  m_msaaRt;
 
 		bool m_needPresent;
+		bool m_firstPresent = true;
 		bool m_lost;
 		uint16_t m_numWindows;
 		FrameBufferHandle m_windows[BGFX_CONFIG_MAX_FRAME_BUFFERS];

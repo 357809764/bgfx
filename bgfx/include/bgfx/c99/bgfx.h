@@ -710,7 +710,7 @@ BGFX_C_API struct bgfx_encoder_s* bgfx_begin(void);
 BGFX_C_API void bgfx_end(struct bgfx_encoder_s* _encoder);
 
 /**/
-BGFX_C_API uint32_t bgfx_frame(bool _capture);
+BGFX_C_API uint32_t bgfx_frame(uint16_t _x, uint16_t _y, uint16_t _width, uint16_t _height, bool _capture);
 
 /**/
 BGFX_C_API bgfx_renderer_type_t bgfx_get_renderer_type(void);

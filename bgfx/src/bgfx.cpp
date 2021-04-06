@@ -2077,6 +2077,11 @@ namespace bgfx
 #endif // BGFX_CONFIG_MULTITHREADED
 	}
 
+	uint32_t Context::frame(uint16_t _x, uint16_t _y, uint16_t _width, uint16_t _height, bool _capture) {
+		m_encoder[0].setFrameDirty(_x, _y, _width, _height);
+		return frame(_capture);
+	}
+
 	uint32_t Context::frame(bool _capture)
 	{
 		m_encoder[0].end(true);
@@ -2176,7 +2181,7 @@ namespace bgfx
 		if (m_rendererInitialized
 		&& !m_flipped)
 		{
-			m_renderCtx->flip();
+			m_renderCtx->flip(m_render->m_dirty);
 			m_flipped = true;
 
 			if (m_renderCtx->isDeviceRemoved() )
@@ -3702,10 +3707,10 @@ namespace bgfx
 		s_ctx->end(_encoder);
 	}
 
-	uint32_t frame(bool _capture)
+	uint32_t frame(uint16_t _x, uint16_t _y, uint16_t _width, uint16_t _height, bool _capture)
 	{
 		BGFX_CHECK_API_THREAD();
-		return s_ctx->frame(_capture);
+		return s_ctx->frame(_x, _y, _width, _height, _capture);
 	}
 
 	const Caps* getCaps()
@@ -5336,9 +5341,9 @@ BGFX_C_API void bgfx_reset(uint32_t _width, uint32_t _height, uint32_t _flags, b
 	bgfx::reset(_width, _height, _flags, bgfx::TextureFormat::Enum(_format) );
 }
 
-BGFX_C_API uint32_t bgfx_frame(bool _capture)
+BGFX_C_API uint32_t bgfx_frame(uint16_t _x, uint16_t _y, uint16_t _width, uint16_t _height, bool _capture)
 {
-	return bgfx::frame(_capture);
+	return bgfx::frame(_x, _y, _width, _height, _capture);
 }
 
 BGFX_C_API bgfx_renderer_type_t bgfx_get_renderer_type(void)

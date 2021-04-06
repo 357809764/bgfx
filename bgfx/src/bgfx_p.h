@@ -2008,6 +2008,8 @@ namespace bgfx
 		CommandBuffer m_cmdPre;
 		CommandBuffer m_cmdPost;
 
+		Rect m_dirty; //present with dirty
+
 		template<typename Ty, uint32_t Max>
 		struct FreeHandle
 		{
@@ -2106,6 +2108,8 @@ namespace bgfx
 
 			m_numSubmitted = 0;
 			m_numDropped   = 0;
+
+			m_frame->m_dirty.clear();
 		}
 
 		void end(bool _finalize)
@@ -2127,6 +2131,10 @@ namespace bgfx
 			{
 				m_uniformSet.clear();
 			}
+		}
+
+		void setFrameDirty(uint16_t _x, uint16_t _y, uint16_t _width, uint16_t _height) {
+			m_frame->m_dirty.set(_x, _y, _width, _height);
 		}
 
 		void setMarker(const char* _name)
@@ -2656,7 +2664,7 @@ namespace bgfx
 		virtual RendererType::Enum getRendererType() const = 0;
 		virtual const char* getRendererName() const = 0;
 		virtual bool isDeviceRemoved() = 0;
-		virtual void flip() = 0;
+		virtual void flip(Rect _dirty) = 0;
 		virtual void createIndexBuffer(IndexBufferHandle _handle, const Memory* _mem, uint16_t _flags) = 0;
 		virtual void destroyIndexBuffer(IndexBufferHandle _handle) = 0;
 		virtual void createVertexDecl(VertexDeclHandle _handle, const VertexDecl& _decl) = 0;
@@ -4596,7 +4604,7 @@ namespace bgfx
 		BGFX_API_FUNC(Encoder* begin(bool _forThread) );
 
 		BGFX_API_FUNC(void end(Encoder* _encoder) );
-
+		BGFX_API_FUNC(uint32_t frame(uint16_t _x, uint16_t _y, uint16_t _width, uint16_t _height, bool _capture));
 		BGFX_API_FUNC(uint32_t frame(bool _capture = false) );
 
 		uint32_t getSeqIncr(ViewId _id)

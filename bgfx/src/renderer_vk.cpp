@@ -1964,7 +1964,7 @@ VK_IMPORT_DEVICE
 			return false;
 		}
 
-		void flip() override
+		void flip(Rect _dirty) override
 		{
 			if (VK_NULL_HANDLE != m_swapchain)
 			{

@@ -2625,7 +2625,7 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 			return false;
 		}
 
-		void flip() override
+		void flip(Rect _dirty) override
 		{
 			if (m_flip)
 			{

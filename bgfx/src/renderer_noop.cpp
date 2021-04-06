@@ -92,7 +92,7 @@ namespace bgfx { namespace noop
 			return false;
 		}
 
-		void flip() override
+		void flip(Rect _dirty) override
 		{
 		}
 

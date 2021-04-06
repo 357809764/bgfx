@@ -1473,7 +1473,7 @@ namespace bgfx { namespace d3d9
 			return false;
 		}
 
-		void flip() override
+		void flip(Rect _dirty) override
 		{
 			if (NULL != m_swapChain)
 			{
