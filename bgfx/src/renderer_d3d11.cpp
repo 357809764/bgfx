@@ -1007,6 +1007,7 @@ namespace bgfx { namespace d3d11
 						}
 					}
 					else {
+						m_scd.swapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
 						m_scd.alphaMode = DXGI_ALPHA_MODE_IGNORE;
 						m_scd.scaling = 0 == g_platformData.nwh
 							? DXGI_SCALING_NONE
