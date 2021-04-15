@@ -389,6 +389,14 @@ namespace bgfx
 		};
 	};
 
+	struct FrameStatistics {
+		uint32_t          PresentCount;
+		uint32_t          PresentRefreshCount;
+		uint32_t          SyncRefreshCount;
+		int64_t		 SyncQPCTime;
+		int64_t		 SyncGPUTime;
+	};
+
 	static const uint16_t kInvalidHandle = UINT16_MAX;
 
 	BGFX_HANDLE(DynamicIndexBufferHandle)
@@ -4015,6 +4023,9 @@ namespace bgfx
 	);
 
 	uint32_t waitRenderFrame(long ms);
+
+	uint32_t getLastPresentCount();
+	bool getFrameStatistics(FrameStatistics* stat);
 
 } // namespace bgfx
 

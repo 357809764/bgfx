@@ -2665,6 +2665,8 @@ namespace bgfx
 		virtual const char* getRendererName() const = 0;
 		virtual bool isDeviceRemoved() = 0;
 		virtual void flip(Rect _dirty) = 0;
+		virtual uint32_t getLastPresentCount() = 0;
+		virtual bool getFrameStatistics(FrameStatistics* stat) = 0;
 		virtual void createIndexBuffer(IndexBufferHandle _handle, const Memory* _mem, uint16_t _flags) = 0;
 		virtual void destroyIndexBuffer(IndexBufferHandle _handle) = 0;
 		virtual void createVertexDecl(VertexDeclHandle _handle, const VertexDecl& _decl) = 0;
@@ -4618,6 +4620,8 @@ namespace bgfx
 		void frameNoRenderWait();
 		void swap();
 		uint32_t waitRenderFrame(long ms);
+		uint32_t getLastPresentCount();
+		bool getFrameStatistics(FrameStatistics* stat);
 
 		// render thread
 		void flip();

@@ -1673,6 +1673,27 @@ namespace bgfx { namespace d3d11
 			return WAIT_FAILED;
 		}
 
+		uint32_t getLastPresentCount() override {
+			UINT presentCount = 0;
+			m_swapChain->GetLastPresentCount(&presentCount);
+			return presentCount;
+		}
+
+		bool getFrameStatistics(FrameStatistics* frameStat) override {
+			DXGI_FRAME_STATISTICS stat = { 0 };
+			HRESULT ret = S_FALSE;
+			if (m_scd.swapEffect == DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
+				|| m_scd.swapEffect == DXGI_SWAP_EFFECT_FLIP_DISCARD) {
+				ret = m_swapChain->GetFrameStatistics(&stat);
+				frameStat->PresentCount = stat.PresentCount;
+				frameStat->PresentRefreshCount = stat.PresentRefreshCount;
+				frameStat->SyncGPUTime = stat.SyncGPUTime.QuadPart;
+				frameStat->SyncQPCTime = stat.SyncQPCTime.QuadPart;
+				frameStat->SyncRefreshCount = stat.SyncRefreshCount;
+			}
+			return ret == S_OK;
+		}
+
 		RendererType::Enum getRendererType() const override
 		{
 			return RendererType::Direct3D11;

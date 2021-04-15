@@ -1453,6 +1453,14 @@ namespace bgfx { namespace d3d12
 			return 0;
 		}
 
+		uint32_t getLastPresentCount() override {
+			return 0;
+		}
+
+		bool getFrameStatistics(FrameStatistics* stat) override {
+			return false;
+		}
+
 		RendererType::Enum getRendererType() const override
 		{
 			return RendererType::Direct3D12;

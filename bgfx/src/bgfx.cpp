@@ -2170,6 +2170,18 @@ namespace bgfx
 		return 0;
 	}
 
+	uint32_t Context::getLastPresentCount() {
+		if (m_rendererInitialized) {
+			return m_renderCtx->getLastPresentCount();
+		}
+		return 0;
+	}
+	bool Context::getFrameStatistics(FrameStatistics* stat) {
+		if (m_rendererInitialized) {
+			return m_renderCtx->getFrameStatistics(stat);
+		}
+		return false;
+	}
 	///
 	RendererContextI* rendererCreate(const Init& _init);
 
@@ -3390,6 +3402,14 @@ namespace bgfx
 
 	uint32_t waitRenderFrame(long ms) {
 		return s_ctx->waitRenderFrame(ms);
+	}
+
+	uint32_t getLastPresentCount() {
+		return s_ctx->getLastPresentCount();
+	}
+
+	bool getFrameStatistics(FrameStatistics* stat) {
+		return s_ctx->getFrameStatistics(stat);
 	}
 
 	Encoder* begin(bool _forThread)

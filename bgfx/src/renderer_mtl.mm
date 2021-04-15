@@ -973,9 +973,16 @@ namespace bgfx { namespace mtl
 		}
 
         uint32_t waitRenderFrame(long ms) override {
-            //todo
             return 0;
-            }
+        }
+
+		uint32_t getLastPresentCount() override {
+
+		}
+
+		bool getFrameStatistics(FrameStatistics* stat) override {
+			return false;
+		}
 
 		void updateViewName(ViewId _id, const char* _name) override
 		{

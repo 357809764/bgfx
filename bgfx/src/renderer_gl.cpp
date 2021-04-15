@@ -2605,6 +2605,14 @@ BX_TRACE("%d, %d, %d, %s", _array, _srgb, _mipAutogen, getName(_format) );
 			return 0;
 		}
 
+		uint32_t getLastPresentCount() override {
+			return 0;
+		}
+
+		bool getFrameStatistics(FrameStatistics* stat) override {
+			return false;
+		}
+
 		RendererType::Enum getRendererType() const override
 		{
 			if (BX_ENABLED(BGFX_CONFIG_RENDERER_OPENGL) )
