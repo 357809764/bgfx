@@ -925,12 +925,6 @@ namespace bgfx { namespace mtl
 			m_uniformReg.remove(_handle);
 		}
 
-		void requestScreenShotPre(const char* _filePath)
-		{
-			BX_UNUSED(_filePath);
-			m_saveScreenshot = true;
-		}
-
 		void requestScreenShot(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void* _data) override
 		{
 			requestPickColor(_handle, _x, _y, _w, _h, _data);
@@ -938,7 +932,29 @@ namespace bgfx { namespace mtl
         
         void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void *_data) override
 		{
-			//todo
+			BX_UNUSED(_handle);
+
+			if (NULL == m_screenshotTarget)
+			{
+				return;
+			}
+
+#if BX_PLATFORM_OSX
+            m_blitCommandEncoder = getBlitCommandEncoder();
+            m_blitCommandEncoder.synchronizeResource(m_screenshotTarget);
+            m_blitCommandEncoder.endEncoding();
+            m_blitCommandEncoder = 0;
+#endif  // BX_PLATFORM_OSX
+
+			m_cmd.kick(false, true);
+			m_commandBuffer = 0;
+
+
+			MTLRegion region = { { _x, _y, 0 }, { _w, _h, 1 } };
+
+			m_screenshotTarget.getBytes(_data, 4*_w, 0, region, 0, 0);
+
+			m_commandBuffer = m_cmd.alloc();
 		}
 
         uint32_t waitRenderFrame(long ms) override {
@@ -2841,10 +2857,33 @@ namespace bgfx { namespace mtl
 				}
 				else
 				{
+					NSView* contentView = nil;
+
+					if ([nvh isKindOfClass:[NSView class]])
+					{
+						contentView = (NSView*) nvh;
+					}
+					else if ([nvh isKindOfClass:[NSWindow class]])
+					{
+						NSWindow* nsWindow = (NSWindow*) nvh;
+						contentView = [nsWindow contentView];
+					} else {
+						BX_WARN(0, "Unable to create Metal device, Please set platform data window to an NSWindow, NSView, or CAMetalLayer");
+						return;
+					}
+
 					NSWindow* nsWindow = (NSWindow*)_nwh;
-					[nsWindow.contentView setWantsLayer:YES];
-					m_metalLayer = [CAMetalLayer layer];
-					[nsWindow.contentView setLayer:m_metalLayer];
+					CALayer* layer = contentView.layer;
+					if (NULL != layer && [layer isKindOfClass:NSClassFromString(@"CAMetalLayer")])
+					{
+						m_metalLayer = (CAMetalLayer*) layer;
+					} 
+					else 
+					{
+						[contentView setWantsLayer:YES];
+						m_metalLayer = [CAMetalLayer layer];
+						[contentView setLayer:m_metalLayer];
+					}
 				}
 			}
 #endif // BX_PLATFORM_*
@@ -3359,7 +3398,7 @@ namespace bgfx { namespace mtl
 		}
 
 		updateResolution(_render->m_resolution);
-
+        //m_saveScreenshot = true;
 		if (m_saveScreenshot
 		||  NULL != m_capture)
 		{

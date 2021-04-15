@@ -465,8 +465,8 @@ public:
 			// Take screen shot at frame 150.
 			if (150 == m_frame)
 			{
-				bgfx::FrameBufferHandle fbh = BGFX_INVALID_HANDLE;
-				bgfx::requestScreenShot(fbh, "temp/frame150");
+				//bgfx::FrameBufferHandle fbh = BGFX_INVALID_HANDLE;
+				//bgfx::requestScreenShot(fbh, "temp/frame150");
 			}
 
 			// Advance to next frame. Rendering thread will be kicked to

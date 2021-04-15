@@ -20,7 +20,7 @@
 //    misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 //
-#pragma warning(disable: 4047 4616 4100 4244)
+//#pragma warning(disable: 4047 4616 4100 4244)
 #include "common.h"
 #include "bgfx_utils.h"
 
