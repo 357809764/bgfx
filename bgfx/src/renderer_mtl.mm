@@ -1110,7 +1110,7 @@ namespace bgfx { namespace mtl
 			return false;
 		}
 
-		void flip() override
+		void flip(Rect _dirty) override
 		{
 			if (NULL == m_commandBuffer)
 			{
