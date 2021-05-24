@@ -1725,6 +1725,11 @@ namespace bgfx
 		m_frameTimeLast = bx::getHPCounter();
 
 		m_submit->create();
+        
+        bool skipInitFrame = false;
+#if BX_PLATFORM_WINDOWS
+        skipInitFrame = true;
+#endif
 
 #if BGFX_CONFIG_MULTITHREADED
 		m_render->create();
@@ -1793,7 +1798,7 @@ namespace bgfx
 
 		// Make sure renderer init is called from render thread.
 		// g_caps is initialized and available after this point.
-		frame(true);
+		frame(skipInitFrame);
 
 		if (!m_rendererInitialized)
 		{
@@ -1839,13 +1844,13 @@ namespace bgfx
 
 		m_submit->m_transientVb = createTransientVertexBuffer(_init.limits.transientVbSize);
 		m_submit->m_transientIb = createTransientIndexBuffer(_init.limits.transientIbSize);
-		frame(true);
+		frame(skipInitFrame);
 
 		if (BX_ENABLED(BGFX_CONFIG_MULTITHREADED) )
 		{
 			m_submit->m_transientVb = createTransientVertexBuffer(_init.limits.transientVbSize);
 			m_submit->m_transientIb = createTransientIndexBuffer(_init.limits.transientIbSize);
-			frame(true);
+			frame(skipInitFrame);
 		}
 
 		g_internalData.caps = getCaps();
