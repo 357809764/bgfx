@@ -2307,6 +2307,9 @@ namespace bgfx { namespace d3d11
  							param.DirtyRectsCount = 1;
 							param.pDirtyRects = &dirty;
 							hr = m_swapChain->Present1(syncInterval, 0, &param);
+							if (!SUCCEEDED(hr)) {
+								hr = m_swapChain->Present(syncInterval, 0);
+							}
 						}
 						
 

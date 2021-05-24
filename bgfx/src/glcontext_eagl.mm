@@ -166,6 +166,7 @@ namespace bgfx { namespace gl
 
 		BX_UNUSED(_width, _height);
 		CAEAGLLayer* layer = (CAEAGLLayer*)g_platformData.nwh;
+		#if 0
 		layer.opaque = [layer.style valueForKey:@"opaque"] == nil ? false : [[layer.style valueForKey:@"opaque"] boolValue];
 
 		layer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys
@@ -175,6 +176,7 @@ namespace bgfx { namespace gl
 			, kEAGLDrawablePropertyColorFormat
 			, nil
 			];
+			#endif
 
 		EAGLContext* context = (EAGLContext*)g_platformData.context;
 		if (NULL == context)

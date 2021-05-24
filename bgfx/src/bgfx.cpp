@@ -1793,7 +1793,7 @@ namespace bgfx
 
 		// Make sure renderer init is called from render thread.
 		// g_caps is initialized and available after this point.
-		frame();
+		frame(true);
 
 		if (!m_rendererInitialized)
 		{
@@ -1839,13 +1839,13 @@ namespace bgfx
 
 		m_submit->m_transientVb = createTransientVertexBuffer(_init.limits.transientVbSize);
 		m_submit->m_transientIb = createTransientIndexBuffer(_init.limits.transientIbSize);
-		frame();
+		frame(true);
 
 		if (BX_ENABLED(BGFX_CONFIG_MULTITHREADED) )
 		{
 			m_submit->m_transientVb = createTransientVertexBuffer(_init.limits.transientVbSize);
 			m_submit->m_transientIb = createTransientIndexBuffer(_init.limits.transientIbSize);
-			frame();
+			frame(true);
 		}
 
 		g_internalData.caps = getCaps();
@@ -2077,12 +2077,12 @@ namespace bgfx
 #endif // BGFX_CONFIG_MULTITHREADED
 	}
 
-	uint32_t Context::frame(uint16_t _x, uint16_t _y, uint16_t _width, uint16_t _height, bool _capture) {
+	uint32_t Context::frame(uint16_t _x, uint16_t _y, uint16_t _width, uint16_t _height, bool _skip) {
 		m_encoder[0].setFrameDirty(_x, _y, _width, _height);
-		return frame(_capture);
+		return frame(_skip);
 	}
 
-	uint32_t Context::frame(bool _capture)
+	uint32_t Context::frame(bool _skip)
 	{
 		m_encoder[0].end(true);
 
@@ -2095,7 +2095,8 @@ namespace bgfx
 		encoderApiWait();
 #endif // BGFX_CONFIG_MULTITHREADED
 
-		m_submit->m_capture = _capture;
+		m_submit->m_capture = false;
+		m_submit->m_skip = _skip;
 
 		BGFX_PROFILER_SCOPE("bgfx/API thread frame", 0xff2040ff);
 		// wait for render thread to finish
@@ -2213,7 +2214,7 @@ namespace bgfx
 	{
 		BGFX_PROFILER_SCOPE("bgfx::renderFrame", 0xff2040ff);
 
-		if (!m_flipAfterRender)
+		if (!m_flipAfterRender && !m_render->m_skip)
 		{
 			BGFX_PROFILER_SCOPE("bgfx/flip", 0xff2040ff);
 			flip();
@@ -2240,7 +2241,7 @@ namespace bgfx
 
 			renderSemPost();
 
-			if (m_flipAfterRender)
+			if (m_flipAfterRender && !m_render->m_skip)
 			{
 				BGFX_PROFILER_SCOPE("bgfx/flip", 0xff2040ff);
 				flip();

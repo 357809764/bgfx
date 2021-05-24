@@ -2084,6 +2084,7 @@ namespace bgfx
 		int64_t m_waitRender;
 
 		bool m_capture;
+		bool m_skip;
 	};
 
 	BX_ALIGN_DECL_CACHE_LINE(struct) EncoderImpl
@@ -2740,7 +2741,7 @@ namespace bgfx
 			, m_renderNoop(NULL)
 			, m_rendererInitialized(false)
 			, m_exit(false)
-			, m_flipAfterRender(false)
+			, m_flipAfterRender(true)
 			, m_singleThreaded(false)
 		{
 		}
