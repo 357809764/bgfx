@@ -28,16 +28,9 @@ basedir=`pwd`
 echo $basedir
 
 #fuyuanliang用户走此分支
-COPY_DIR="/Users/liy/work/gerrit/brushcore/brush-v2/core/cpp/thirdpart/bgfx/prebuild/ios/"
+COPY_DIR="/Users/liy/work/gerrit/brushcore/thirdpart/bgfx/prebuilt/ios/"
 if [[ ${basedir} =~ "liy" ]];then
-cp -rf ${OUT_DIR}/libbgfxRelease.a ${COPY_DIR}/libbgfxRelease.a
-cp -rf ${OUT_DIR}/libbxRelease.a ${COPY_DIR}/libbxRelease.a
-cp -rf ${OUT_DIR}/libbimgRelease.a ${COPY_DIR}/libbimgRelease.a
-cp -rf ${OUT_DIR}/libbimg_decodeRelease.a ${COPY_DIR}/libbimg_decodeRelease.a
-cp -rf ${OUT_DIR}/libbgfxDebug.a ${COPY_DIR}/libbgfxDebug.a
-cp -rf ${OUT_DIR}/libbxDebug.a ${COPY_DIR}/libbxDebug.a
-cp -rf ${OUT_DIR}/libbimgDebug.a ${COPY_DIR}/libbimgDebug.a
-cp -rf ${OUT_DIR}/libbimg_decodeDebug.a ${COPY_DIR}/libbimg_decodeDebug.a
+cp -rf ${OUT_DIR}/ ${COPY_DIR}/
 
 #open ${ARM64_DIR} &
 #open ${ARM_DIR} &
