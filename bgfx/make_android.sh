@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #export ANDROID_NDK_ROOT="/Users/liy/Library/Android/sdk/ndk-bundle"
-export ANDROID_NDK_ROOT="/Users/liy/android/android-ndk-r16b"
+export ANDROID_NDK_ROOT="/Users/liy/Library/Android/sdk/ndk/16.1.4479499"
 export ANDROID_NDK_ARM="${ANDROID_NDK_ROOT}/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64"
 export ANDROID_NDK_ARM64="${ANDROID_NDK_ROOT}/toolchains/aarch64-linux-android-4.9/prebuilt/darwin-x86_64"
 export ANDROID_NDK_X86="${ANDROID_NDK_ROOT}/toolchains/x86-4.9/prebuilt/darwin-x86_64"

@@ -7,7 +7,7 @@
 #include "bgfx_utils.h"
 #include "imgui/imgui.h"
 
-#pragma warning(disable: 4047 4616 4100 4244)
+//#pragma warning(disable: 4047 4616 4100 4244)
 
 static uint32_t globalColorBuf[4];
 static uint32_t validFrames = 0;
