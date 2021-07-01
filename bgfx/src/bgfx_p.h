@@ -1803,6 +1803,7 @@ namespace bgfx
 			: m_waitSubmit(0)
 			, m_waitRender(0)
 			, m_capture(false)
+			, m_skip(true)
 		{
 			SortKey term;
 			term.reset();
