@@ -1345,7 +1345,7 @@ public:
 
 			// Advance to next frame. Rendering thread will be kicked to
 			// process submitted rendering primitives.
-			bgfx::frame();
+            bgfx::frame(0, 0, 0, 0, false);
 
 			//reset clear values on used views
 			clearViewMask(s_clearMask, BGFX_CLEAR_NONE, m_clearValues);

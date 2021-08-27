@@ -177,7 +177,7 @@ public:
 
 		/// When data is passed to bgfx via makeRef we need to make
 		/// sure library is done with it before freeing memory blocks.
-		bgfx::frame();
+		bgfx::frame(0, 0, 0, 0, false);
 
 		bx::AllocatorI* allocator = entry::getAllocator();
 		BX_FREE(allocator, m_terrain.m_vertices);
@@ -483,7 +483,7 @@ public:
 
 			// Advance to next frame. Rendering thread will be kicked to
 			// process submitted rendering primitives.
-			bgfx::frame();
+			bgfx::frame(0, 0, 0, 0, false);
 
 			return true;
 		}

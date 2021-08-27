@@ -932,16 +932,14 @@ namespace bgfx { namespace mtl
         
         void requestPickColor(FrameBufferHandle _handle, uint32_t _x, uint32_t _y, uint32_t _w, uint32_t _h, void *_data) override
 		{
-			BX_UNUSED(_handle);
+            FrameBufferMtl& frameBuffer = m_frameBuffers[_handle.idx];
 
-			if (NULL == m_screenshotTarget)
-			{
-				return;
-			}
+            const TextureMtl& texture = m_textures[frameBuffer.m_colorHandle[0].idx];
+                
 
 #if BX_PLATFORM_OSX
             m_blitCommandEncoder = getBlitCommandEncoder();
-            m_blitCommandEncoder.synchronizeResource(m_screenshotTarget);
+            m_blitCommandEncoder.synchronizeResource(texture.m_ptr);
             m_blitCommandEncoder.endEncoding();
             m_blitCommandEncoder = 0;
 #endif  // BX_PLATFORM_OSX
@@ -952,7 +950,7 @@ namespace bgfx { namespace mtl
 
 			MTLRegion region = { { _x, _y, 0 }, { _w, _h, 1 } };
 
-			m_screenshotTarget.getBytes(_data, 4*_w, 0, region, 0, 0);
+            texture.m_ptr.getBytes(_data, 4*_w, 0, region, 0, 0);
 
 			m_commandBuffer = m_cmd.alloc();
 		}
@@ -962,7 +960,7 @@ namespace bgfx { namespace mtl
         }
 
 		uint32_t getLastPresentCount() override {
-
+            return 0;
 		}
 
 		bool getFrameStatistics(FrameStatistics* stat) override {

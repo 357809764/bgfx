@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright 2017 Stanislav Pidhorskyi. All rights reserved.
  * License: https://github.com/bkaradzic/bgfx#license-bsd-2-clause
  */
@@ -498,7 +498,7 @@ namespace
 			bgfx::destroy(m_lightmapTexture);
 			bgfx::destroy(m_landscapeProgram);
 
-			bgfx::frame();
+			bgfx::frame(0, 0, 0, 0, false);
 
 			// Shutdown bgfx.
 			bgfx::shutdown();
@@ -613,7 +613,7 @@ namespace
 
 				m_sky.draw();
 
-				bgfx::frame();
+                bgfx::frame(0, 0, 0, 0, false);
 
 				return true;
 			}

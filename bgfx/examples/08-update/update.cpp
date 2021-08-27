@@ -322,7 +322,7 @@ public:
 		// m_texture2dData is managed from main thread, and it's passed to renderer
 		// just as MemoryRef. At this point render might be using it. We must wait
 		// previous frame to finish before we can free it.
-		bgfx::frame();
+		bgfx::frame(0, 0, 0, 0, false);
 
 		// Cleanup.
 		free(m_texture2dData);
@@ -624,7 +624,7 @@ public:
 
 			// Advance to next frame. Rendering thread will be kicked to
 			// process submitted rendering primitives.
-			bgfx::frame();
+			bgfx::frame(0, 0, 0, 0, false);
 
 			return true;
 		}

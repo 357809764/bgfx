@@ -407,7 +407,7 @@ public:
 
 			// Advance to next frame. Rendering thread will be kicked to
 			// process submitted rendering primitives.
-			m_currFrame = bgfx::frame();
+            m_currFrame = bgfx::frame(0, 0, 0, 0, false);
 
 			return true;
 		}

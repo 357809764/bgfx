@@ -816,7 +816,7 @@ public:
 
 			// Advance to next frame. Rendering thread will be kicked to
 			// process submitted rendering primitives.
-			bgfx::frame();
+            bgfx::frame(0, 0, 0, 0, false);
 
 			return true;
 		}
