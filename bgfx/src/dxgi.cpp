@@ -696,7 +696,7 @@ DX_RELEASE(output6, 1);
 				hr = swapChain4->SetHDRMetaData(DXGI_HDR_METADATA_TYPE_HDR10, sizeof(DXGI_HDR_METADATA_HDR10), &hdr10);
 			}
 
-			DX_RELEASE(swapChain4, 1);
+			swapChain4->Release();
 		}
 #else
 BX_UNUSED(_swapChain, _scd);

@@ -12,7 +12,7 @@ namespace bgfx { namespace d3d11
 {
 	static wchar_t s_viewNameW[BGFX_CONFIG_MAX_VIEWS][BGFX_CONFIG_MAX_VIEW_NAME];
 	static char s_viewName[BGFX_CONFIG_MAX_VIEWS][BGFX_CONFIG_MAX_VIEW_NAME];
-
+	static const GUID IID_IDXGISwapChain1 = { 0x790a45f7, 0x0d42, 0x4876, {0x98, 0x3a, 0x0a, 0x55, 0xcf, 0xe6, 0xf4, 0xaa } };
 	struct PrimInfo
 	{
 		D3D11_PRIMITIVE_TOPOLOGY m_type;
@@ -648,6 +648,7 @@ namespace bgfx { namespace d3d11
 			, m_ags(NULL)
 			, m_featureLevel(D3D_FEATURE_LEVEL(0) )
 			, m_swapChain(NULL)
+			, m_swapChain1(NULL)
 			, m_compTarget(NULL)
 			, m_lost(false)
 			, m_numWindows(0)
@@ -1054,6 +1055,8 @@ namespace bgfx { namespace d3d11
 								goto error;
 							}
 						}
+						m_swapChain->QueryInterface(IID_IDXGISwapChain1, (void**)&m_swapChain1);
+						
 
 						m_resolution       = _init.resolution;
 						m_resolution.reset = _init.resolution.reset & (~BGFX_RESET_INTERNAL_FORCE);
@@ -1553,6 +1556,7 @@ namespace bgfx { namespace d3d11
 				DX_RELEASE(m_annotation, 1);
 				DX_RELEASE_W(m_infoQueue, 0);
 				DX_RELEASE(m_msaaRt, 0);
+				DX_RELEASE(m_swapChain1, 1);
 				DX_RELEASE(m_swapChain, 0);
 				DX_RELEASE(m_deviceCtx, 0);
 				DX_RELEASE(m_device, 0);
@@ -1643,6 +1647,7 @@ namespace bgfx { namespace d3d11
 			DX_RELEASE(m_annotation, 1);
 			DX_RELEASE_W(m_infoQueue, 0);
 			DX_RELEASE(m_msaaRt, 0);
+			DX_RELEASE(m_swapChain1, 1);
 			DX_RELEASE(m_swapChain, 0);
 			DX_RELEASE(m_deviceCtx, 0);
 			DX_RELEASE(m_device, 0);
@@ -2292,7 +2297,7 @@ namespace bgfx { namespace d3d11
 					if (NULL != m_swapChain
 					&&  m_needPresent)
 					{
-						if (m_firstPresent || _dirty.isZero()) {
+						if (m_firstPresent || _dirty.isZero() || m_swapChain1 == NULL) {
 							hr = m_swapChain->Present(syncInterval, 0);
 							m_firstPresent = false;
 						}
@@ -2306,7 +2311,7 @@ namespace bgfx { namespace d3d11
 							dirty.bottom = _dirty.m_y + _dirty.m_height;
  							param.DirtyRectsCount = 1;
 							param.pDirtyRects = &dirty;
-							hr = m_swapChain->Present1(syncInterval, 0, &param);
+							hr = m_swapChain1->Present1(syncInterval, 0, &param);
 							if (!SUCCEEDED(hr)) {
 								hr = m_swapChain->Present(syncInterval, 0);
 							}
@@ -2487,6 +2492,7 @@ namespace bgfx { namespace d3d11
 						updateMsaa(m_scd.format);
 						m_scd.sampleDesc = s_msaa[(m_resolution.reset&BGFX_RESET_MSAA_MASK)>>BGFX_RESET_MSAA_SHIFT];
 
+						DX_RELEASE(m_swapChain1, 1);
 						DX_RELEASE(m_swapChain, 0);
 
 						HRESULT hr = m_dxgi.createSwapChain(m_device
@@ -2495,6 +2501,7 @@ namespace bgfx { namespace d3d11
 							, &m_compTarget
 							);
 						BGFX_FATAL(SUCCEEDED(hr), bgfx::Fatal::UnableToInitialize, "Failed to create swap chain.");
+						m_swapChain->QueryInterface(IID_IDXGISwapChain1, (void**)&m_swapChain1);
 					}
 
 					if (1 < m_scd.sampleDesc.Count)
@@ -3520,6 +3527,7 @@ namespace bgfx { namespace d3d11
 
 		HANDLE m_waitObject;
 		Dxgi::SwapChainI* m_swapChain;
+		::IDXGISwapChain1* m_swapChain1;
 		IDCompositionTarget* m_compTarget;
 		ID3D11Texture2D*  m_msaaRt;
 
