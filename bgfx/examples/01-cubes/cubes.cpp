@@ -431,7 +431,7 @@ public:
 
 			// Advance to next frame. Rendering thread will be kicked to
 			// process submitted rendering primitives.
-			uint32_t curFrame = bgfx::frame();
+            uint32_t curFrame = bgfx::frame(0, 0, 0, 0, false);
 			if (curFrame == validFrames) {
 				g_pickColor = globalColorBuf[0];
 			}

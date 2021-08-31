@@ -62,7 +62,7 @@ int32_t _main_(int32_t _argc, char** _argv)
 
 		// Advance to next frame. Rendering thread will be kicked to
 		// process submitted rendering primitives.
-		bgfx_frame(false);
+        bgfx_frame(0, 0, 0, 0,false);
 	}
 
 	// Shutdown bgfx.

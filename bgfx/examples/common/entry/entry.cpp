@@ -508,7 +508,7 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 	int runApp(AppI* _app, int _argc, const char* const* _argv)
 	{
 		_app->init(_argc, _argv, s_width, s_height);
-		bgfx::frame(0, 0, 0, 0, false);
+		bgfx::frame(0, 0,0, 0, false);
 
 		WindowHandle defaultWindow = { 0 };
 		setWindowSize(defaultWindow, s_width, s_height);

@@ -544,7 +544,7 @@ struct ClearValues
 	uint8_t  m_clearStencil;
 };
 
-void submit(bgfx::ViewId _id, bgfx::ProgramHandle _handle, int32_t _depth = 0)
+void Xsubmit(bgfx::ViewId _id, bgfx::ProgramHandle _handle, int32_t _depth = 0)
 {
 	bgfx::submit(_id, _handle, _depth);
 
@@ -552,7 +552,7 @@ void submit(bgfx::ViewId _id, bgfx::ProgramHandle _handle, int32_t _depth = 0)
 	s_viewMask |= 1 << _id;
 }
 
-void touch(bgfx::ViewId _id)
+void Xtouch(bgfx::ViewId _id)
 {
 	bgfx::ProgramHandle handle = BGFX_INVALID_HANDLE;
 	::submit(_id, handle);
@@ -2866,7 +2866,7 @@ public:
 
 			// Advance to next frame. Rendering thread will be kicked to
 			// process submitted rendering primitives.
-			bgfx::frame();
+            bgfx::frame(0, 0, 0, 0, false);
 
 			// Swap memory pages.
 			s_svAllocator.swap();

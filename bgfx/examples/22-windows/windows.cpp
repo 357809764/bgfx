@@ -314,7 +314,7 @@ public:
 
 			// Advance to next frame. Rendering thread will be kicked to
 			// process submitted rendering primitives.
-			bgfx::frame();
+			bgfx::frame(0, 0, 0, 0, false);
 
 			return true;
 		}
@@ -344,8 +344,7 @@ public:
 				m_fbh[ii].idx = bgfx::kInvalidHandle;
 
 				// Flush destruction of swap chain before destroying window!
-				bgfx::frame();
-				bgfx::frame();
+				bgfx::frame(0, 0, 0, 0, false);
 			}
 
 			if (entry::isValid(m_windows[ii].m_handle) )
