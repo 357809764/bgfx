@@ -498,8 +498,8 @@ namespace bgfx
 		if (SUCCEEDED(hr) )
 		{
 			IDXGIDevice2* dxgiDevice2;
-			_device->QueryInterface(IID_IDXGIDevice2, (void**)&dxgiDevice2);
-			if (NULL != dxgiDevice2) {
+			HRESULT ret = _device->QueryInterface(IID_IDXGIDevice2, (void**)&dxgiDevice2);
+			if (SUCCEEDED(ret)) {
 				dxgiDevice2->SetMaximumFrameLatency(_scd.maxFrameLatency);
 				DX_RELEASE_I(dxgiDevice2);
 			}

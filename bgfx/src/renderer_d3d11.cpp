@@ -1055,7 +1055,7 @@ namespace bgfx { namespace d3d11
 								goto error;
 							}
 						}
-						m_swapChain->QueryInterface(IID_IDXGISwapChain1, (void**)&m_swapChain1);
+						DX_CHECK(m_swapChain->QueryInterface(IID_IDXGISwapChain1, (void**)&m_swapChain1));
 						
 
 						m_resolution       = _init.resolution;
@@ -2485,7 +2485,15 @@ namespace bgfx { namespace d3d11
 					{
 						m_deviceCtx->OMSetRenderTargets(1, s_zero.m_rtv, NULL);
 
-						DX_CHECK(m_dxgi.resizeBuffers(m_swapChain, m_scd) );
+						HRESULT hr = m_dxgi.resizeBuffers(m_swapChain, m_scd);
+						m_lost = isLost(hr);
+						BGFX_FATAL(!m_lost
+							, bgfx::Fatal::DeviceLost
+							, "Device is lost. FAILED 0x%08x %s (%s)"
+							, hr
+							, getLostReason(hr)
+							, DXGI_ERROR_DEVICE_REMOVED == hr ? getLostReason(m_device->GetDeviceRemovedReason()) : "no info"
+							);
 					}
 					else
 					{
